@@ -41,56 +41,58 @@ int main( ){
 
     // INTRODUCE THE VARIABLES:
     // -------------------------
-    DifferentialState     x,y,psi,v;//, dummy;
+    DifferentialState     x,y,psi,v, s;//, dummy;
     Control               a,delta;//, sv;
     DifferentialEquation  f    ;
 
-    OnlineData goal_x;
-    OnlineData goal_y;
-    OnlineData goal_psi;
+	OnlineData a_X1;
+	OnlineData b_X1;
+	OnlineData c_X1;
+	OnlineData d_X1;
+	OnlineData a_Y1;
+	OnlineData b_Y1;
+	OnlineData c_Y1;
+	OnlineData d_Y1;
 
-    OnlineData wX;
-    OnlineData wY;
-    OnlineData wPsi;
-    OnlineData wa;
-    OnlineData wdelta;
+	OnlineData a_X2;
+	OnlineData b_X2;
+	OnlineData c_X2;
+	OnlineData d_X2;
+	OnlineData a_Y2;
+	OnlineData b_Y2;
+	OnlineData c_Y2;
+	OnlineData d_Y2;
 
-    OnlineData wX_T;
-    OnlineData wY_T;
-    OnlineData wPsi_T;
+	OnlineData Wx;
+	OnlineData Wy;
+	OnlineData Wa;
+	OnlineData Wdelta;
 
-    OnlineData ws;
-	OnlineData wP;
+	OnlineData s01;
+	OnlineData s02;
+	OnlineData vref;
+	OnlineData d;
 
-    OnlineData r_disc;
-    OnlineData disc_pos;
+	Expression lambda = 1/(1 + exp((s - d)/0.05));
 
-    OnlineData obst1_x;
-    OnlineData obst1_y;
-    OnlineData obst1_theta;
-    OnlineData obst1_major;
-    OnlineData obst1_minor;
+	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
+	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
+	Expression dx_path1 = (3*a_X1*(s-s01)*(s-s01) + 2*b_X1*(s-s01) + c_X1) ;
+	Expression dy_path1 = (3*a_Y1*(s-s01)*(s-s01) + 2*b_Y1*(s-s01) + c_Y1) ;
 
-	OnlineData obst2_x;
-	OnlineData obst2_y;
-	OnlineData obst2_theta;
-	OnlineData obst2_major;
-	OnlineData obst2_minor;
+	Expression x_path2 = (a_X2*(s-s02)*(s-s02)*(s-s02) + b_X2*(s-s02)*(s-s02) + c_X2*(s-s02) + d_X2) ;
+	Expression y_path2 = (a_Y2*(s-s02)*(s-s02)*(s-s02) + b_Y2*(s-s02)*(s-s02) + c_Y2*(s-s02) + d_Y2) ;
+	Expression dx_path2 = (3*a_X2*(s-s02)*(s-s02) + 2*b_X2*(s-s02) + c_X2) ;
+	Expression dy_path2 = (3*a_Y2*(s-s02)*(s-s02) + 2*b_Y2*(s-s02) + c_Y2) ;
 
-/*	double goal_x = 5.0;
-	double goal_y =2.0;
-	double goal_psi =0;
+	Expression x_path = lambda*x_path1 + (1 - lambda)*x_path2;
+	Expression y_path = lambda*y_path1 + (1 - lambda)*y_path2;
+	Expression dx_path = lambda*dx_path1 + (1 - lambda)*dx_path2;
+	Expression dy_path = lambda*dy_path1 + (1 - lambda)*dy_path2;
 
-	double wX =1;
-	double wY =1;
-	double wPsi=1;
-	double wa=1;
-	double wdelta=1;
-
-	double wX_T=1;
-	double wY_T=1;
-	double wPsi_T=1;
-*/
+	Expression abs_grad = sqrt(dx_path.getPowInt(2) + dy_path.getPowInt(2));
+	Expression dx_path_norm = dx_path/abs_grad;
+	Expression dy_path_norm =  dy_path/abs_grad;
 
 	double lr=1.123; // distance from center of mass of the vehicle to the rear
 	double lf=1.577; // distance from center of mass of the vehicle to the front
@@ -104,99 +106,28 @@ int main( ){
     f << dot(y) == v*sin(psi+beta);
     f << dot(psi) == v/lr*sin(beta);
     f << dot(v) == a;
+    f << dot(s) == v;
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
-    OCP ocp( 0.0, 10.0, 25.0 );
+    OCP ocp( 0.0, 5.0, 25.0 );
 
+    // Need to set the number of online variables!
     ocp.setNOD(25);
 
-	ocp.minimizeLagrangeTerm(wX*(x-goal_x)*(x-goal_x)+ wY*(y-goal_y)*(y-goal_y)+ wPsi*(psi-goal_psi)*(psi-goal_psi)+wa*a*a+wdelta*delta*delta);//+ wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001))));  // weigh this with the physical cost!!!
-    ocp.minimizeMayerTerm(wX_T*(x-goal_x)*(x-goal_x)+ wY_T*(y-goal_y)*(y-goal_y)+ wPsi_T*(psi-goal_psi)*(psi-goal_psi));
-    
+	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
+
+	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
+
+
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag + Wdelta*delta*delta +Wa*(v-vref)*(v-vref));// weight this with the physical cost!!!
     ocp.subjectTo( f );
-	//only for simulation
-	//ocp.subjectTo( AT_START, x ==  0.0 );
-	//ocp.subjectTo( AT_START, v ==  0.0 );
-	//ocp.subjectTo( AT_START, y ==  0.0 );
+	//ocp.setModel(f);
+
     ocp.subjectTo( -4 <= a <= 1.5 );
     ocp.subjectTo( -0.52 <= delta <= 0.52 );
 	ocp.subjectTo( 0 <= v <= 13.8 );
 
-    // DEFINE COLLISION CONSTRAINTS:
-    // ---------------------------------------
-	/*Expression ab_1(2,2);
-	ab_1(0,0) = 1/((obst1_major + r_disc)*(obst1_major + r_disc));
-	ab_1(0,1) = 0;
-	ab_1(1,1) = 1/((obst1_minor + r_disc)*(obst1_minor + r_disc));
-	ab_1(1,0) = 0;
-
-	Expression ab_2(2,2);
-	ab_2(0,0) = 1/((obst2_major + r_disc)*(obst2_major + r_disc));
-	ab_2(0,1) = 0;
-	ab_2(1,1) = 1/((obst2_minor + r_disc)*(obst2_minor + r_disc));
-	ab_2(1,0) = 0;
-
-	Expression R_obst_1(2,2);
-	R_obst_1(0,0) = cos(obst1_theta);
-	R_obst_1(0,1) = -sin(obst1_theta);
-	R_obst_1(1,0) = sin(obst1_theta);
-	R_obst_1(1,1) = cos(obst1_theta);
-
-	Expression R_obst_2(2,2);
-	R_obst_2(0,0) = cos(obst2_theta);
-	R_obst_2(0,1) = -sin(obst2_theta);
-	R_obst_2(1,0) = sin(obst2_theta);
-	R_obst_2(1,1) = cos(obst2_theta);
-
-	Expression deltaPos_disc_1(2,1);
-	deltaPos_disc_1(0) =  x - obst1_x;
-	deltaPos_disc_1(1) =  y - obst1_y;
-
-	Expression deltaPos_disc_2(2,1);
-	deltaPos_disc_2(0) =  x - obst2_x;
-	deltaPos_disc_2(1) =  y - obst2_y;
-
-	Expression c_obst_1, c_obst_2;
-	c_obst_1 = deltaPos_disc_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_1;
-	c_obst_2 = deltaPos_disc_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_2;
-
-	ocp.subjectTo(c_obst_1 >= 1);
-	ocp.subjectTo(c_obst_2 >= 1);
-*/
-	// DEFINE A PLOT WINDOW:
-	// ---------------------
-	/*GnuplotWindow window;
-		 window.addSubplot( x ,"X"  );
-		 window.addSubplot( y ,"Y"  );
-		 window.addSubplot( psi ,"Psi"  );
-		 window.addSubplot( v,"V" );
-		 window.addSubplot( a,"A" );
-		 window.addSubplot( delta,"Delta" );
-	 // DEFINE AN OPTIMIZATION ALGORITHM AND SOLVE THE OCP:
-	 // ---------------------------------------------------
-	 OptimizationAlgorithm algorithm(ocp);
-	 //RealTimeAlgorithm algorithm(ocp);
-	 algorithm.set( HESSIAN_APPROXIMATION, EXACT_HESSIAN );
-	 algorithm.set(PRINTLEVEL, NONE);                       // default MEDIUM (NONE, MEDIUM, HIGH)
-	 algorithm.set(PRINT_SCP_METHOD_PROFILE, false);        // default false
-	 algorithm.set(PRINT_COPYRIGHT, false);                 // default true
-	 algorithm.set( DISCRETIZATION_TYPE, MULTIPLE_SHOOTING);
-	 Grid t(0,10.0,25);
-	 VariablesGrid s2(4,0,10.0,25),c2(2,0,10.0,25);
-	 algorithm.initializeDifferentialStates(s2);
-	 algorithm.initializeControls          (c2);
-
-	 algorithm.set( MAX_NUM_ITERATIONS, 100 );
-	 algorithm.set( KKT_TOLERANCE, 1e-3 );
-	 algorithm << window;
-	 //algorithm.solve(0.0,state_ini);
-	 algorithm.solve();
-	 VariablesGrid s3,c3;
-	 algorithm.getDifferentialStates(s3);
-	 algorithm.getControls          (c3);
-
-*/
 	// DEFINE AN MPC EXPORT MODULE AND GENERATE THE CODE:
 	// ----------------------------------------------------------
 	OCPexport mpc( ocp );
