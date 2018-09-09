@@ -133,7 +133,7 @@ int main( ){
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
-    OCP ocp( 0.0, 5.0, 25.0 );
+    OCP ocp( 0.0, 2.5, 25.0 );
 
     // Need to set the number of online variables!
     ocp.setNOD(38);
@@ -142,7 +142,7 @@ int main( ){
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
 
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag + ws*sv*sv + Ww*w*w +Wv*(v-vref)*(v-vref) + wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour +a*a+ Wy*error_lag*error_lag + ws*sv*sv + Wdelta*delta*delta +Wa*(v-vref)*(v-vref) + wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
 	ocp.setModel(f);
 
     	ocp.subjectTo( -4 <= a <= 1.5 );
