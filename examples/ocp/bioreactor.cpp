@@ -40,10 +40,11 @@ int main( ){
 
     // INTRODUCE THE VARIABLES:
     // -------------------------
-    DifferentialState     x,y,theta,s,dummy;
-    Control               v,w,sv   ;
+    DifferentialState     x,y,psi,v,s, dummy;
+    Control               a,delta, sv;
     DifferentialEquation  f    ;
-
+    
+    // Parameters required for the spline
 	OnlineData a_X1;
 	OnlineData b_X1;
 	OnlineData c_X1;
@@ -61,39 +62,54 @@ int main( ){
 	OnlineData b_Y2;
 	OnlineData c_Y2;
 	OnlineData d_Y2;
-
-	OnlineData Wx;
-	OnlineData Wy;
-	OnlineData Wv;
-	OnlineData Ww;
 	
 	OnlineData s01;
 	OnlineData s02;
+	
+	// d: used to evaluate lambda (equivalent of delta in the Jackal version)
+	OnlineData d;
 
+    // Wx: weight of contour error 
+    OnlineData Wx;
+    // Wy: weight of lag error
+	OnlineData Wy;
+	// Wv: weight on the desired acceleration
+	OnlineData Wa;
+	// Wdelta: weight on the delta command
+	OnlineData Wdelta;
+	
+	// vref1, vref2: to define the desired reference speed
 	OnlineData vref1;
 	OnlineData vref2;
-
-	OnlineData delta;
-
+	
+    // ws: weight on the slack variable sv
 	OnlineData ws;
+	// Wp: for the potential field associated with the obstacles in the cost
 	OnlineData wP;
 
 	OnlineData r_disc;
-	OnlineData disc_pos;
-
+	OnlineData disc_pos_0;
+    //Description of Obstacle 1
 	OnlineData obst1_x;
 	OnlineData obst1_y;
 	OnlineData obst1_theta;
+	// obst1_major:  major axis of the ellipse defining the obstacle
 	OnlineData obst1_major;
+	// obst1_minor:  minor axis of the ellipse defining the obstacle
 	OnlineData obst1_minor;
 
+    //Description of Obstacle 1
 	OnlineData obst2_x;
 	OnlineData obst2_y;
 	OnlineData obst2_theta;
 	OnlineData obst2_major;
 	OnlineData obst2_minor;
+	// Wv: weight on the desired acceleration
+	OnlineData Wv;
+	OnlineData disc_pos_1;
+	OnlineData disc_pos_2;
 
-	Expression lambda = 1/(1 + exp((s - delta)/0.1));
+	Expression lambda = 1/(1 + exp((s - d)/0.1));
 
 	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
 	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
@@ -115,14 +131,24 @@ int main( ){
 	Expression dy_path_norm =  dy_path/abs_grad;
 
 	Expression vref = lambda*vref1 + (1 - lambda)*vref2;
+	
+	double lr=1.123; // distance from center of mass of the vehicle to the rear
+	double lf=1.577; // distance from center of mass of the vehicle to the front
+	double ratio =lr/(lf+lr);
+	double length = 4.540; // car length in m
+	double width = 1.760; // car width in m
+	
+	IntermediateState beta;
+	beta = atan(ratio*tan(delta));
 
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
     
-    f << dot(x) == v*cos(theta);
-    f << dot(y) == v*sin(theta);
-    f << dot(theta) == w;
-	f << dot(s) == v;
+    f << dot(x) == v*cos(psi+beta);
+    f << dot(y) == v*sin(psi+beta);
+    f << dot(psi) == v/lr*sin(beta);
+    f << dot(v) == a;
+    f << dot(s) == v;
 	f << dot(dummy) == sv;
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
@@ -130,17 +156,82 @@ int main( ){
     OCP ocp( 0.0, 5.0, 25.0 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(38);
+    ocp.setNOD(42);
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
+	
+	Expression road_boundary = -dy_path_norm * (x - x_path) + dx_path_norm * (y - y_path);
+	
+	Expression R_car(2,2);
+	R_car(0,0) = cos(psi);
+	R_car(0,1) = -sin(psi);
+	R_car(1,0) = sin(psi);
+	R_car(1,1) = cos(psi);
+	
+	Expression CoG(2,1);
+	CoG(0) = x;
+	CoG(1) = y; 
+	
+	Expression shift_1(2,1);
+	shift_1(0) = disc_pos_0;//-0.255;
+	shift_1(1) = 0;
+	Expression shift_2(2,1);
+	shift_2(0) = disc_pos_1;//2.64;
+	shift_2(1) = 0;
+	Expression shift_3(2,1);
+	shift_3(0) = disc_pos_2;//4.4;
+	shift_3(1) = 0;
+	
+    Expression position_disc_1(2,1);
+	position_disc_1 = CoG+R_car*shift_1;
+	
+	Expression position_disc_2(2,1);
+	position_disc_2 = CoG+R_car*shift_2;
+	
+	Expression position_disc_3(2,1);
+	position_disc_3 = CoG+R_car*shift_3;
+	
+	// For Obstacle 1
+	
+	Expression CoG_obst1(2,1);
+	CoG_obst1(0) = obst1_x;
+	CoG_obst1(1) = obst1_y;
+	
+	Expression deltaPos_disc_1_obstacle_1(2,1);
+	deltaPos_disc_1_obstacle_1 =  position_disc_1 - CoG_obst1;
+	
+	Expression deltaPos_disc_2_obstacle_1(2,1);
+	deltaPos_disc_2_obstacle_1 =  position_disc_2 - CoG_obst1;
+	
+	Expression deltaPos_disc_3_obstacle_1(2,1);
+	deltaPos_disc_3_obstacle_1 =  position_disc_3 - CoG_obst1;
+	
+	// For Obstacle 2
+	
+	Expression CoG_obst2(2,1);
+	CoG_obst2(0) = obst2_x;
+	CoG_obst2(1) = obst2_y;
+	
+	Expression deltaPos_disc_1_obstacle_2(2,1);
+	deltaPos_disc_1_obstacle_2 =  position_disc_1 - CoG_obst2;
+	
+	Expression deltaPos_disc_2_obstacle_2(2,1);
+	deltaPos_disc_2_obstacle_2 =  position_disc_2 - CoG_obst2;
+	
+	Expression deltaPos_disc_3_obstacle_2(2,1);
+	deltaPos_disc_3_obstacle_2 =  position_disc_3 - CoG_obst2;
+	
 
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref) + wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*((1/(deltaPos_disc_1_obstacle_1.transpose()*deltaPos_disc_1_obstacle_1+0.001))+((1/(deltaPos_disc_2_obstacle_1.transpose()*deltaPos_disc_2_obstacle_1+0.001)))+((1/(deltaPos_disc_3_obstacle_1.transpose()*deltaPos_disc_3_obstacle_1+0.001)))+(1/(deltaPos_disc_1_obstacle_2.transpose()*deltaPos_disc_1_obstacle_2+0.001))+((1/(deltaPos_disc_2_obstacle_2.transpose()*deltaPos_disc_2_obstacle_2+0.001)))+((1/(deltaPos_disc_3_obstacle_2.transpose()*deltaPos_disc_3_obstacle_2+0.001))))); // weight this with the physical cost!!!
 	ocp.setModel(f);
 
-    ocp.subjectTo( -1.0 <= v <= 1.0 );
-    ocp.subjectTo( -1.0 <= w <= 1.0 );
+    ocp.subjectTo( -6 <= a <= 1.5 );
+    ocp.subjectTo( -0.52 <= delta <= 0.52 );
+	ocp.subjectTo( 0 <= v <= 13.8 );
+	ocp.subjectTo(road_boundary -sv<= 3);
+	ocp.subjectTo(-road_boundary-sv<= 3);
 
     // DEFINE COLLISION CONSTRAINTS:
 	// ---------------------------------------
@@ -168,21 +259,24 @@ int main( ){
 	R_obst_2(0,1) = -sin(obst2_theta);
 	R_obst_2(1,0) = sin(obst2_theta);
 	R_obst_2(1,1) = cos(obst2_theta);
+	
 
-	Expression deltaPos_disc_1(2,1);
-	deltaPos_disc_1(0) =  x - obst1_x;
-	deltaPos_disc_1(1) =  y - obst1_y;
+	Expression c_disc_1_obst_1, c_disc_2_obst_1, c_disc_3_obst_1, c_disc_1_obst_2, c_disc_2_obst_2, c_disc_3_obst_2;
+	c_disc_1_obst_1 = deltaPos_disc_1_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_1_obstacle_1;
+	c_disc_2_obst_1 = deltaPos_disc_2_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_2_obstacle_1;
+	c_disc_3_obst_1 = deltaPos_disc_3_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_3_obstacle_1;	
+	c_disc_1_obst_2 = deltaPos_disc_1_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_1_obstacle_2;
+	c_disc_2_obst_2 = deltaPos_disc_2_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_2_obstacle_2;
+	c_disc_3_obst_2 = deltaPos_disc_3_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_3_obstacle_2;
+	
 
-	Expression deltaPos_disc_2(2,1);
-	deltaPos_disc_2(0) =  x - obst2_x;
-	deltaPos_disc_2(1) =  y - obst2_y;
-
-	Expression c_obst_1, c_obst_2;
-	c_obst_1 = deltaPos_disc_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_1;
-	c_obst_2 = deltaPos_disc_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_2;
-
-	ocp.subjectTo(c_obst_1 - sv >= 1);
-	ocp.subjectTo(c_obst_2 - sv >= 1);
+	ocp.subjectTo(c_disc_1_obst_1 + sv >= 1);
+	ocp.subjectTo(c_disc_2_obst_1 + sv >= 1);
+	ocp.subjectTo(c_disc_3_obst_1 + sv >= 1);
+	ocp.subjectTo(c_disc_1_obst_2 + sv >= 1);
+	ocp.subjectTo(c_disc_2_obst_2 + sv >= 1);
+	ocp.subjectTo(c_disc_3_obst_2 + sv >= 1);
+	ocp.subjectTo(sv >= 0);
 
     // DEFINE AN MPC EXPORT MODULE AND GENERATE THE CODE:
 	// ----------------------------------------------------------
