@@ -153,7 +153,8 @@ int main( ){
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
-    OCP ocp( 0.0, 5.0, 25.0 );
+    // OCP ocp( 0.0, 5.0, 25.0 );
+    OCP ocp( 0.0, 2.5, 25.0 );
 
     // Need to set the number of online variables!
     ocp.setNOD(42);
