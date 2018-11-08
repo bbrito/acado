@@ -331,7 +331,7 @@ int main( ){
 	mpc.set( HESSIAN_APPROXIMATION,       EXACT_HESSIAN  		);
 	mpc.set( DISCRETIZATION_TYPE,         MULTIPLE_SHOOTING 	);
 	mpc.set( INTEGRATOR_TYPE,             INT_RK4			);
-	mpc.set( NUM_INTEGRATOR_STEPS,        25            		);
+	mpc.set( NUM_INTEGRATOR_STEPS,        16            		);
 	mpc.set( QP_SOLVER,                   QP_QPOASES    		);
 	mpc.set( HOTSTART_QP,                 NO             		);
 	mpc.set( GENERATE_TEST_FILE,          YES            		);
