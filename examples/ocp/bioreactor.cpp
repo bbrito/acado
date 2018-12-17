@@ -249,7 +249,7 @@ int main( ){
 	
 	Expression deltaPos_disc_5_obstacle_2(2,1);
 	deltaPos_disc_5_obstacle_2 =  position_disc_5 - CoG_obst2;
-	
+
 
 
     ocp.subjectTo( -6 <= a <= 1 );
@@ -320,7 +320,7 @@ int main( ){
 	ocp.subjectTo(sv >= 0);
 	
 	//	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*((1/(deltaPos_disc_1_obstacle_1.transpose()*deltaPos_disc_1_obstacle_1+0.01))+((1/(deltaPos_disc_2_obstacle_1.transpose()*deltaPos_disc_2_obstacle_1+0.01)))+((1/(deltaPos_disc_3_obstacle_1.transpose()*deltaPos_disc_3_obstacle_1+0.01)))+(1/(deltaPos_disc_1_obstacle_2.transpose()*deltaPos_disc_1_obstacle_2+0.01))+((1/(deltaPos_disc_2_obstacle_2.transpose()*deltaPos_disc_2_obstacle_2+0.01)))+((1/(deltaPos_disc_3_obstacle_2.transpose()*deltaPos_disc_3_obstacle_2+0.01))))); // weight this with the physical cost!!!
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_4_obst_1)*(1-c_disc_4_obst_1)+.001))+wP*(1/((1-c_disc_5_obst_1)*(1-c_disc_5_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_4_obst_2)*(1-c_disc_4_obst_2)+.001))+wP*(1/((1-c_disc_5_obst_2)*(1-c_disc_5_obst_2)+.001))+10*dot(delta)*dot(delta)+dot(a)*dot(a));//+dot(a)*dot(a) // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_4_obst_1)*(1-c_disc_4_obst_1)+.001))+wP*(1/((1-c_disc_5_obst_1)*(1-c_disc_5_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_4_obst_2)*(1-c_disc_4_obst_2)+.001))+wP*(1/((1-c_disc_5_obst_2)*(1-c_disc_5_obst_2)+.001))+10000*exp((road_boundary - 3.36)/0.1)+10000*exp(-(road_boundary+1.1)/0.1));//+dot(a)*dot(a) // weight this with the physical cost!!!
 	ocp.setModel(f);
 
 
