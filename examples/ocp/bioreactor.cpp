@@ -156,7 +156,7 @@ int main( ){
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
     // OCP ocp( 0.0, 5.0, 25.0 );
-    OCP ocp( 0.0, 2, 25.0 );
+    OCP ocp( 0.0, 5, 25.0 );
 
     // Need to set the number of online variables!
     ocp.setNOD(44);
@@ -252,13 +252,13 @@ int main( ){
 	
 
 
-    ocp.subjectTo( -6 <= a <= 1.5 );
+    ocp.subjectTo( -6 <= a <= 1 );
     ocp.subjectTo( -0.52 <= delta <= 0.52 );
 	ocp.subjectTo( 0 <= v <= 13.8 );
 	// to test if the car stops with stricter road boundaries uncomment
 	//ocp.subjectTo(road_boundary  <= .75+.88);
-	ocp.subjectTo(road_boundary -sv<= 6);
-	ocp.subjectTo(-road_boundary-sv<= 6);
+	ocp.subjectTo(road_boundary <= 3.36);
+	ocp.subjectTo(-road_boundary<= 1);
 
     // DEFINE COLLISION CONSTRAINTS:
 	// ---------------------------------------
@@ -320,7 +320,7 @@ int main( ){
 	ocp.subjectTo(sv >= 0);
 	
 	//	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*((1/(deltaPos_disc_1_obstacle_1.transpose()*deltaPos_disc_1_obstacle_1+0.01))+((1/(deltaPos_disc_2_obstacle_1.transpose()*deltaPos_disc_2_obstacle_1+0.01)))+((1/(deltaPos_disc_3_obstacle_1.transpose()*deltaPos_disc_3_obstacle_1+0.01)))+(1/(deltaPos_disc_1_obstacle_2.transpose()*deltaPos_disc_1_obstacle_2+0.01))+((1/(deltaPos_disc_2_obstacle_2.transpose()*deltaPos_disc_2_obstacle_2+0.01)))+((1/(deltaPos_disc_3_obstacle_2.transpose()*deltaPos_disc_3_obstacle_2+0.01))))); // weight this with the physical cost!!!
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_4_obst_1)*(1-c_disc_4_obst_1)+.001))+wP*(1/((1-c_disc_5_obst_1)*(1-c_disc_5_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_4_obst_2)*(1-c_disc_4_obst_2)+.001))+wP*(1/((1-c_disc_5_obst_2)*(1-c_disc_5_obst_2)+.001))); // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_4_obst_1)*(1-c_disc_4_obst_1)+.001))+wP*(1/((1-c_disc_5_obst_1)*(1-c_disc_5_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_4_obst_2)*(1-c_disc_4_obst_2)+.001))+wP*(1/((1-c_disc_5_obst_2)*(1-c_disc_5_obst_2)+.001))+10*dot(delta)*dot(delta)+dot(a)*dot(a));//+dot(a)*dot(a) // weight this with the physical cost!!!
 	ocp.setModel(f);
 
 
