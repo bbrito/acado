@@ -1,0 +1,8 @@
+Name: ACADO Toolkit
+Description: Toolkit for Automatic Control and Dynamic Optimization
+URL: http://www.acadotoolkit.org
+Version: 1.2.2beta
+Libs: -L/home/demo/Code/ACADOtoolkit/cmake-build-debug/lib -lacado_toolkit_s
+Cflags: -I/home/demo/Code/ACADOtoolkit -I/home/demo/Code/ACADOtoolkit/acado -I/home/demo/Code/ACADOtoolkit/external_packages -I/home/demo/Code/ACADOtoolkit/external_packages/qpOASES-3.2.0/include -I/home/demo/Code/ACADOtoolkit/cmake-build-debug
+qpOASESsrc= /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/Bounds.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/CyclingManager.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/MessageHandling.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/QProblem.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/Utils.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/Constraints.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/Indexlist.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/QProblemB.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/SubjectTo.cpp /home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC/EXTRAS/SolutionAnalysis.cpp
+qpOASESinc= -I/home/demo/Code/ACADOtoolkit/external_packages/qpoases/ -I/home/demo/Code/ACADOtoolkit/external_packages/qpoases/INCLUDE -I/home/demo/Code/ACADOtoolkit/external_packages/qpoases/SRC
