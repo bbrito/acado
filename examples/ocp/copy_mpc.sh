@@ -1,8 +1,8 @@
 #!/bin/bash
 
-cp -r ./generated_mpc ~/catkin_ws/src/predictive_control/src/
+cp -r ./generated_mpc ~/ros/catkin_ws/src/lmpcc/src/
 
-mv ~/catkin_ws/src/predictive_control/src/generated_mpc/acado_common.h ~/catkin_ws/src/predictive_control/include/predictive_control/generated_mpc/
-mv ~/catkin_ws/src/predictive_control/src/generated_mpc/acado_auxiliary_functions.h ~/catkin_ws/src/predictive_control/include/predictive_control/generated_mpc/
-mv ~/catkin_ws/src/predictive_control/src/generated_mpc/acado_qpoases_interface.hpp ~/catkin_ws/src/predictive_control/include/predictive_control/generated_mpc/
+mv ~/ros/catkin_ws/src/lmpcc/src/generated_mpc/acado_common.h ~/ros/catkin_ws/src/lmpcc/include/lmpcc/generated_mpc/
+mv ~/ros/catkin_ws/src/lmpcc/src/generated_mpc/acado_auxiliary_functions.h ~/ros/catkin_ws/src/lmpcc/include/lmpcc/generated_mpc/
+mv ~/ros/catkin_ws/src/lmpcc/src/generated_mpc/acado_qpoases_interface.hpp ~/ros/catkin_ws/src/lmpcc/include/lmpcc/generated_mpc/
 
