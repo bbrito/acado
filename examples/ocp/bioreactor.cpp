@@ -257,8 +257,8 @@ int main( ){
 	ocp.subjectTo( 0 <= v <= 13.8 );
 	// to test if the car stops with stricter road boundaries uncomment
 	//ocp.subjectTo(road_boundary  <= .75+.88);
-	ocp.subjectTo(road_boundary <= 4);
-	ocp.subjectTo(-road_boundary<= 1);
+	ocp.subjectTo(road_boundary <= 5);
+	ocp.subjectTo(-road_boundary<= 2);
 
     // DEFINE COLLISION CONSTRAINTS:
 	// ---------------------------------------
