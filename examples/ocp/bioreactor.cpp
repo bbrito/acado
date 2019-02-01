@@ -140,15 +140,15 @@ int main( ){
 	double length = 4.540; // car length in m
 	double width = 1.760; // car width in m
 	
-	IntermediateState beta;
-	beta = atan(ratio*tan(delta));
+	//IntermediateState beta;
+	//beta = atan(ratio*tan(delta));
 
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
     
-    f << dot(x) == v*cos(psi+beta);
-    f << dot(y) == v*sin(psi+beta);
-    f << dot(psi) == v/lr*sin(beta);
+    f << dot(x) == v*cos(psi+delta);
+    f << dot(y) == v*sin(psi+delta);
+    f << dot(psi) == v/lr*sin(delta);
     f << dot(v) == a;
     f << dot(s) == v;
 	f << dot(dummy) == sv;
@@ -252,13 +252,13 @@ int main( ){
 	
 
 
-    ocp.subjectTo( -6 <= a <= 1 );
-    ocp.subjectTo( -0.52 <= delta <= 0.52 );
+    ocp.subjectTo( -6 <= a <= 1.5 );
+    ocp.subjectTo( -0.30 <= delta <= 0.30 );
 	ocp.subjectTo( 0 <= v <= 13.8 );
 	// to test if the car stops with stricter road boundaries uncomment
 	//ocp.subjectTo(road_boundary  <= .75+.88);
-	ocp.subjectTo(road_boundary <= 5);
-	ocp.subjectTo(-road_boundary<= 2);
+	ocp.subjectTo(road_boundary <= 4);
+	ocp.subjectTo(-road_boundary<= 1);
 
     // DEFINE COLLISION CONSTRAINTS:
 	// ---------------------------------------
@@ -320,7 +320,7 @@ int main( ){
 	ocp.subjectTo(sv >= 0);
 	
 	//	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*((1/(deltaPos_disc_1_obstacle_1.transpose()*deltaPos_disc_1_obstacle_1+0.01))+((1/(deltaPos_disc_2_obstacle_1.transpose()*deltaPos_disc_2_obstacle_1+0.01)))+((1/(deltaPos_disc_3_obstacle_1.transpose()*deltaPos_disc_3_obstacle_1+0.01)))+(1/(deltaPos_disc_1_obstacle_2.transpose()*deltaPos_disc_1_obstacle_2+0.01))+((1/(deltaPos_disc_2_obstacle_2.transpose()*deltaPos_disc_2_obstacle_2+0.01)))+((1/(deltaPos_disc_3_obstacle_2.transpose()*deltaPos_disc_3_obstacle_2+0.01))))); // weight this with the physical cost!!!
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+10000*exp((road_boundary - 3.9)/0.1)+10000*exp(-(road_boundary+1.1)/0.1));//+dot(a)*dot(a) // weight this with the physical cost!!!+wP*(1/((1-c_disc_4_obst_1)*(1-c_disc_4_obst_1)+.001))+wP*(1/((1-c_disc_5_obst_1)*(1-c_disc_5_obst_1)+.001))+wP*(1/((1-c_disc_4_obst_2)*(1-c_disc_4_obst_2)+.001))+wP*(1/((1-c_disc_5_obst_2)*(1-c_disc_5_obst_2)+.001))
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+10000*exp((road_boundary - 4)/0.1)+10000*exp(-(road_boundary+1.5)/0.1));//+dot(a)*dot(a) // weight this with the physical cost!!!+wP*(1/((1-c_disc_4_obst_1)*(1-c_disc_4_obst_1)+.001))+wP*(1/((1-c_disc_5_obst_1)*(1-c_disc_5_obst_1)+.001))+wP*(1/((1-c_disc_4_obst_2)*(1-c_disc_4_obst_2)+.001))+wP*(1/((1-c_disc_5_obst_2)*(1-c_disc_5_obst_2)+.001))
 	ocp.setModel(f);
 
 
