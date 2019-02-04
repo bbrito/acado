@@ -40,7 +40,7 @@ int main( ){
 
     // INTRODUCE THE VARIABLES:
     // -------------------------
-    DifferentialState     x,y,psi,v,s, dummy;
+    DifferentialState     x,y,psi,v,s, dummy ;
     Control               a,delta, sv;
     DifferentialEquation  f    ;
     
@@ -110,10 +110,6 @@ int main( ){
 	OnlineData disc_pos_2;
 	OnlineData disc_pos_3;
 	OnlineData disc_pos_4;
-	
-	OnlineData measurement_error;
-	OnlineData measured_later_acceleration;
-	OnlineData psi_error;
 
 	Expression lambda = 1/(1 + exp((s - d)/0.1));
 
@@ -138,21 +134,19 @@ int main( ){
 
 	Expression vref = lambda*vref1 + (1 - lambda)*vref2;
 	
-	double lr=1.123; // distance from center of mass of the vehicle to the rear
-	double lf=1.577; // distance from center of mass of the vehicle to the front
+	double lf=0.0; // distance from center of mass of the vehicle to the rear
+	double lr=1.577+1.123; // distance from center of mass of the vehicle to the front
 	double ratio =lr/(lf+lr);
 	double length = 4.540; // car length in m
 	double width = 1.760; // car width in m
 	
-	IntermediateState beta;
-	beta = atan(ratio*tan(delta));
 
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
     
-    f << dot(x) == v*cos(psi+beta);
-    f << dot(y) == v*sin(psi+beta);
-    f << dot(psi) == v/lr*sin(beta);
+    f << dot(x) == v*cos(psi+delta);
+    f << dot(y) == v*sin(psi+delta);
+    f << dot(psi) == v/lr*sin(delta);
     f << dot(v) == a;
     f << dot(s) == v;
 	f << dot(dummy) == sv;
@@ -160,16 +154,16 @@ int main( ){
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
     // OCP ocp( 0.0, 5.0, 25.0 );
-    OCP ocp( 0.0, 3.0, 25.0 );
+    OCP ocp( 0.0, 5.0, 25.0 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(47);
+    ocp.setNOD(44);
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
 	
-	
+	Expression road_boundary = -dy_path_norm * (x - x_path) + dx_path_norm * (y - y_path);
 	
 	Expression R_car(2,2);
 	R_car(0,0) = cos(psi);
@@ -177,7 +171,6 @@ int main( ){
 	R_car(1,0) = sin(psi);
 	R_car(1,1) = cos(psi);
 	
-	Expression road_boundary = -dy_path_norm * (x - x_path) + dx_path_norm * (y - y_path);
 	Expression CoG(2,1);
 	CoG(0) = x;
 	CoG(1) = y; 
@@ -191,12 +184,7 @@ int main( ){
 	Expression shift_3(2,1);
 	shift_3(0) = disc_pos_2;//4.4;
 	shift_3(1) = 0;
-	Expression shift_4(2,1);
-	shift_4(0) = disc_pos_3;//4.4;
-	shift_4(1) = 0;
-	Expression shift_5(2,1);
-	shift_5(0) = disc_pos_4;//4.4;
-	shift_5(1) = 0;
+
 	
     Expression position_disc_1(2,1);
 	position_disc_1 = CoG+R_car*shift_1;
@@ -207,11 +195,7 @@ int main( ){
 	Expression position_disc_3(2,1);
 	position_disc_3 = CoG+R_car*shift_3;
 	
-	Expression position_disc_4(2,1);
-	position_disc_4 = CoG+R_car*shift_4;
-	
-	Expression position_disc_5(2,1);
-	position_disc_5 = CoG+R_car*shift_5;
+
 	
 	// For Obstacle 1
 	
@@ -227,12 +211,7 @@ int main( ){
 	
 	Expression deltaPos_disc_3_obstacle_1(2,1);
 	deltaPos_disc_3_obstacle_1 =  position_disc_3 - CoG_obst1;
-	
-	Expression deltaPos_disc_4_obstacle_1(2,1);
-	deltaPos_disc_4_obstacle_1 =  position_disc_4 - CoG_obst1;
-	
-	Expression deltaPos_disc_5_obstacle_1(2,1);
-	deltaPos_disc_5_obstacle_1 =  position_disc_5 - CoG_obst1;
+
 	
 	// For Obstacle 2
 	
@@ -249,28 +228,19 @@ int main( ){
 	Expression deltaPos_disc_3_obstacle_2(2,1);
 	deltaPos_disc_3_obstacle_2 =  position_disc_3 - CoG_obst2;
 	
-    Expression deltaPos_disc_4_obstacle_2(2,1);
-	deltaPos_disc_4_obstacle_2 =  position_disc_4 - CoG_obst2;
-	
-	Expression deltaPos_disc_5_obstacle_2(2,1);
-	deltaPos_disc_5_obstacle_2 =  position_disc_5 - CoG_obst2;
+
 	
 
-    
-   
-   
-    //ocp.subjectTo(  -2<=dot(a)<= 2 );
-    
-    ocp.subjectTo(-6<=  a <= 1.5 );
-    
+
+    ocp.subjectTo( -6 <= a <= 1 );
     ocp.subjectTo( -0.52 <= delta <= 0.52 );
 	ocp.subjectTo( 0 <= v <= 13.8 );
-	//ocp.subjectTo(-0.52 <= psi <= 0.52);
-	
+	//ocp.subjectTo( -10 <= jerk <= 10 );
+	//ocp.subjectTo( -0.5 <= delta_rate <= 0.5 );
 	// to test if the car stops with stricter road boundaries uncomment
-	//ocp.subjectTo(road_boundary  <= .75+.88);
-	ocp.subjectTo(road_boundary <= 6-1.5);
-	ocp.subjectTo(-road_boundary<= 6-1.5);
+	//ocp.subjectTo(road_boundary  <= 1.5+.88);
+	ocp.subjectTo(road_boundary <= 4.24);
+	ocp.subjectTo(-road_boundary<= 1.88);
 
     // DEFINE COLLISION CONSTRAINTS:
 	// ---------------------------------------
@@ -300,19 +270,15 @@ int main( ){
 	R_obst_2(1,1) = cos(obst2_theta);
 	
 
-	Expression c_disc_1_obst_1, c_disc_2_obst_1, c_disc_3_obst_1,  c_disc_4_obst_1,  c_disc_5_obst_1, c_disc_1_obst_2, c_disc_2_obst_2, c_disc_3_obst_2, c_disc_4_obst_2, c_disc_5_obst_2;
+	Expression c_disc_1_obst_1, c_disc_2_obst_1, c_disc_3_obst_1, c_disc_1_obst_2, c_disc_2_obst_2, c_disc_3_obst_2;
 	c_disc_1_obst_1 = deltaPos_disc_1_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_1_obstacle_1;
 	c_disc_2_obst_1 = deltaPos_disc_2_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_2_obstacle_1;
 	c_disc_3_obst_1 = deltaPos_disc_3_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_3_obstacle_1;	
-	c_disc_4_obst_1 = deltaPos_disc_4_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_4_obstacle_1;
-	c_disc_5_obst_1 = deltaPos_disc_5_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_5_obstacle_1;
 	
 	c_disc_1_obst_2 = deltaPos_disc_1_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_1_obstacle_2;
 	c_disc_2_obst_2 = deltaPos_disc_2_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_2_obstacle_2;
 	c_disc_3_obst_2 = deltaPos_disc_3_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_3_obstacle_2;
-	c_disc_4_obst_2 = deltaPos_disc_4_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_4_obstacle_2;
-	c_disc_5_obst_2 = deltaPos_disc_5_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_5_obstacle_2;
-
+	
 	//ocp.subjectTo(c_disc_1_obst_1 + sv >= 1);
 	//ocp.subjectTo(c_disc_2_obst_1 + sv >= 1);
 	//ocp.subjectTo(c_disc_3_obst_1 + sv >= 1);
@@ -322,21 +288,17 @@ int main( ){
 	ocp.subjectTo(c_disc_1_obst_1 + sv >= 1);
 	ocp.subjectTo(c_disc_2_obst_1 + sv >= 1);
 	ocp.subjectTo(c_disc_3_obst_1 + sv >= 1);
-	ocp.subjectTo(c_disc_4_obst_1 + sv >= 1);
-	ocp.subjectTo(c_disc_5_obst_1 + sv >= 1);
+	//ocp.subjectTo(c_disc_4_obst_1 + sv >= 1);
+	//ocp.subjectTo(c_disc_5_obst_1 + sv >= 1);
 	ocp.subjectTo(c_disc_1_obst_2 + sv >= 1);
 	ocp.subjectTo(c_disc_2_obst_2 + sv >= 1);
 	ocp.subjectTo(c_disc_3_obst_2 + sv >= 1);
-	ocp.subjectTo(c_disc_4_obst_2 + sv >= 1);
-	ocp.subjectTo(c_disc_5_obst_2 + sv >= 1);
+	//ocp.subjectTo(c_disc_4_obst_2 + sv >= 1);
+	//ocp.subjectTo(c_disc_5_obst_2 + sv >= 1);
 	ocp.subjectTo(sv >= 0);
 	
-	Expression a_l;
-	a_l = dot(dot(y))+dot(x)*dot(psi); // lateral acceleration
-	//ocp.subjectTo(a_l-sv<=2);
-	//ocp.subjectTo(a_l+sv>=-2);
 	//	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*((1/(deltaPos_disc_1_obstacle_1.transpose()*deltaPos_disc_1_obstacle_1+0.01))+((1/(deltaPos_disc_2_obstacle_1.transpose()*deltaPos_disc_2_obstacle_1+0.01)))+((1/(deltaPos_disc_3_obstacle_1.transpose()*deltaPos_disc_3_obstacle_1+0.01)))+(1/(deltaPos_disc_1_obstacle_2.transpose()*deltaPos_disc_1_obstacle_2+0.01))+((1/(deltaPos_disc_2_obstacle_2.transpose()*deltaPos_disc_2_obstacle_2+0.01)))+((1/(deltaPos_disc_3_obstacle_2.transpose()*deltaPos_disc_3_obstacle_2+0.01))))); // weight this with the physical cost!!!
-	ocp.minimizeLagrangeTerm(10*(a_l)*(a_l)+Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*(a)*(a)+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_4_obst_1)*(1-c_disc_4_obst_1)+.001))+wP*(1/((1-c_disc_5_obst_1)*(1-c_disc_5_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+wP*(1/((1-c_disc_4_obst_2)*(1-c_disc_4_obst_2)+.001))+wP*(1/((1-c_disc_5_obst_2)*(1-c_disc_5_obst_2)+.001))); // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+10000*exp((road_boundary-2.15-1)/0.1)+10000*exp(-(road_boundary+5.12)/0.1));//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
 	ocp.setModel(f);
 
 
