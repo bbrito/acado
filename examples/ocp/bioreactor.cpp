@@ -40,76 +40,21 @@ int main( ){
 
     // INTRODUCE THE VARIABLES:
     // -------------------------
-    DifferentialState     x,y,theta,s,dummy1,dummy2;
+    DifferentialState     x,y,theta,dummy1,dummy2;
     Control               v,w,sv1,sv2;
     DifferentialEquation  f;
 
-	OnlineData a_X1;
-	OnlineData b_X1;
-	OnlineData c_X1;
-	OnlineData d_X1;
-	OnlineData a_Y1;
-	OnlineData b_Y1;
-	OnlineData c_Y1;
-	OnlineData d_Y1;
-
-	OnlineData a_X2;
-	OnlineData b_X2;
-	OnlineData c_X2;
-	OnlineData d_X2;
-	OnlineData a_Y2;
-	OnlineData b_Y2;
-	OnlineData c_Y2;
-	OnlineData d_Y2;
-
-	OnlineData a_X3;
-	OnlineData b_X3;
-	OnlineData c_X3;
-	OnlineData d_X3;
-	OnlineData a_Y3;
-	OnlineData b_Y3;
-	OnlineData c_Y3;
-	OnlineData d_Y3;
-
-	OnlineData a_X4;
-	OnlineData b_X4;
-	OnlineData c_X4;
-	OnlineData d_X4;
-	OnlineData a_Y4;
-	OnlineData b_Y4;
-	OnlineData c_Y4;
-	OnlineData d_Y4;
-
-	OnlineData a_X5;
-	OnlineData b_X5;
-	OnlineData c_X5;
-	OnlineData d_X5;
-	OnlineData a_Y5;
-	OnlineData b_Y5;
-	OnlineData c_Y5;
-	OnlineData d_Y5;
+	OnlineData x_goal;
+	OnlineData y_goal;
+	OnlineData theta_goal;
 
 	OnlineData Wx;
 	OnlineData Wy;
+	OnlineData Wtheta;
 	OnlineData Wv;
 	OnlineData Ww;
 
-	OnlineData s01;
-	OnlineData s02;
-	OnlineData s03;
-	OnlineData s04;
-	OnlineData s05;
-
-	OnlineData vref1;
-	OnlineData vref2;
-	OnlineData vref3;
-	OnlineData vref4;
-	OnlineData vref5;
-
-	OnlineData delta1;
-	OnlineData delta2;
-	OnlineData delta3;
-	OnlineData delta4;
+	OnlineData vref;
 
 	OnlineData ws;
 	OnlineData wP;
@@ -149,54 +94,12 @@ int main( ){
 	OnlineData collision_free_C3;
 	OnlineData collision_free_C4;
 
-	Expression lambda1 = 1/(1 + exp((s - delta1)/0.1));
-	Expression lambda2 = 1/(1 + exp((s - delta2)/0.1));
-	Expression lambda3 = 1/(1 + exp((s - delta3)/0.1));
-	Expression lambda4 = 1/(1 + exp((s - delta4)/0.1));
-
-	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
-	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
-	Expression dx_path1 = (3*a_X1*(s-s01)*(s-s01) + 2*b_X1*(s-s01) + c_X1) ;
-	Expression dy_path1 = (3*a_Y1*(s-s01)*(s-s01) + 2*b_Y1*(s-s01) + c_Y1) ;
-
-	Expression x_path2 = (a_X2*(s-s02)*(s-s02)*(s-s02) + b_X2*(s-s02)*(s-s02) + c_X2*(s-s02) + d_X2) ;
-	Expression y_path2 = (a_Y2*(s-s02)*(s-s02)*(s-s02) + b_Y2*(s-s02)*(s-s02) + c_Y2*(s-s02) + d_Y2) ;
-	Expression dx_path2 = (3*a_X2*(s-s02)*(s-s02) + 2*b_X2*(s-s02) + c_X2) ;
-	Expression dy_path2 = (3*a_Y2*(s-s02)*(s-s02) + 2*b_Y2*(s-s02) + c_Y2) ;
-
-	Expression x_path3 = (a_X3*(s-s03)*(s-s03)*(s-s03) + b_X3*(s-s03)*(s-s03) + c_X3*(s-s03) + d_X3) ;
-	Expression y_path3 = (a_Y3*(s-s03)*(s-s03)*(s-s03) + b_Y3*(s-s03)*(s-s03) + c_Y3*(s-s03) + d_Y3) ;
-	Expression dx_path3 = (3*a_X3*(s-s03)*(s-s03) + 2*b_X3*(s-s03) + c_X3) ;
-	Expression dy_path3 = (3*a_Y3*(s-s03)*(s-s03) + 2*b_Y3*(s-s03) + c_Y3) ;
-
-	Expression x_path4 = (a_X4*(s-s04)*(s-s04)*(s-s04) + b_X4*(s-s04)*(s-s04) + c_X4*(s-s04) + d_X4) ;
-	Expression y_path4 = (a_Y4*(s-s04)*(s-s04)*(s-s04) + b_Y4*(s-s04)*(s-s04) + c_Y4*(s-s04) + d_Y4) ;
-	Expression dx_path4 = (3*a_X4*(s-s04)*(s-s04) + 2*b_X4*(s-s04) + c_X4) ;
-	Expression dy_path4 = (3*a_Y4*(s-s04)*(s-s04) + 2*b_Y4*(s-s04) + c_Y4) ;
-
-	Expression x_path5 = (a_X5*(s-s05)*(s-s05)*(s-s05) + b_X5*(s-s05)*(s-s05) + c_X5*(s-s05) + d_X5) ;
-	Expression y_path5 = (a_Y5*(s-s05)*(s-s05)*(s-s05) + b_Y5*(s-s05)*(s-s05) + c_Y5*(s-s05) + d_Y5) ;
-	Expression dx_path5 = (3*a_X5*(s-s05)*(s-s05) + 2*b_X5*(s-s05) + c_X5) ;
-	Expression dy_path5 = (3*a_Y5*(s-s05)*(s-s05) + 2*b_Y5*(s-s05) + c_Y5) ;
-
-	Expression x_path = lambda1*lambda2*lambda3*lambda4*x_path1 + (1 - lambda1)*lambda2*lambda3*lambda4*x_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*x_path3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*x_path4 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*x_path5;
-	Expression y_path = lambda1*lambda2*lambda3*lambda4*y_path1 + (1 - lambda1)*lambda2*lambda3*lambda4*y_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*y_path3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*y_path4 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*y_path5;
-	Expression dx_path = lambda1*lambda2*lambda3*lambda4*dx_path1 + (1 - lambda1)*lambda2*lambda3*lambda4*dx_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*dx_path3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*dx_path4 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*dx_path5;
-	Expression dy_path = lambda1*lambda2*lambda3*lambda4*dy_path1 + (1 - lambda1)*lambda2*lambda3*lambda4*dy_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*dy_path3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*dy_path4 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*dy_path5;
-
-	Expression abs_grad = sqrt(dx_path.getPowInt(2) + dy_path.getPowInt(2));
-	Expression dx_path_norm = dx_path/abs_grad;
-	Expression dy_path_norm =  dy_path/abs_grad;
-
-	Expression vref = lambda1*lambda2*lambda3*lambda4*vref1 + (1 - lambda1)*lambda2*lambda3*lambda4*vref2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*vref3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*vref4 +  (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*vref5;
-
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
     
     f << dot(x) == v*cos(theta);
     f << dot(y) == v*sin(theta);
     f << dot(theta) == w;
-	f << dot(s) == v;
 	f << dot(dummy1) == sv1;
     f << dot(dummy2) == sv2;
 
@@ -205,13 +108,9 @@ int main( ){
     OCP ocp( 0.0, 5, 25.0 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(88);
+    ocp.setNOD(39);
 
-	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
-
-	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
-
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref) + wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*(x-x_goal)*(x-x_goal) + ws*sv1*sv1 + ws*sv2*sv2 + Wy*(y-y_goal)*(y-y_goal) + Wtheta*(theta-theta_goal)*(theta-theta_goal)+ Ww*w*w +Wv*(v-vref)*(v-vref) + wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
 	ocp.setModel(f);
 
     ocp.subjectTo( -2.0 <= v <= 2.0 );
