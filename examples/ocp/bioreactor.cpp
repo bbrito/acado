@@ -74,11 +74,6 @@ int main( ){
 	OnlineData obst2_major;
 	OnlineData obst2_minor;
 
-	OnlineData collision_free_xmin;
-	OnlineData collision_free_xmax;
-	OnlineData collision_free_ymin;
-	OnlineData collision_free_ymax;
-
 	OnlineData collision_free_a1x;
 	OnlineData collision_free_a2x;
 	OnlineData collision_free_a3x;
@@ -108,7 +103,7 @@ int main( ){
     OCP ocp( 0.0, 5, 25.0 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(39);
+    ocp.setNOD(35);
 
 	ocp.minimizeLagrangeTerm(Wx*(x-x_goal)*(x-x_goal) + ws*sv1*sv1 + ws*sv2*sv2 + Wy*(y-y_goal)*(y-y_goal) + Wtheta*(theta-theta_goal)*(theta-theta_goal)+ Ww*w*w +Wv*(v-vref)*(v-vref) + wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
 	ocp.setModel(f);
