@@ -133,7 +133,7 @@ int main( ){
 	Expression dy_path_norm =  dy_path/abs_grad;
 
 	Expression vref = lambda*vref1 + (1 - lambda)*vref2;
-	
+
 	double lf=0.0; // distance from center of mass of the vehicle to the rear
 	double lr=1.577+1.123; // distance from center of mass of the vehicle to the front
 	double ratio =lr/(lf+lr);
