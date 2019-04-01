@@ -86,7 +86,6 @@ int main( ){
 	OnlineData ws;
 	// Wp: for the potential field associated with the obstacles in the cost
 	OnlineData wP;
-
 	OnlineData r_disc;
 	OnlineData disc_pos_0;
     //Description of Obstacle 1
@@ -134,9 +133,11 @@ int main( ){
 
 	Expression vref = lambda*vref1 + (1 - lambda)*vref2;
 
-	double lf=0.0; // distance from center of mass of the vehicle to the rear
-	double lr=1.577+1.123; // distance from center of mass of the vehicle to the front
-	double ratio =lr/(lf+lr);
+	double lf=1.123; // distance from center of mass of the vehicle to the front
+	double lr=1.577; // distance from center of mass of the vehicle to the rear
+	double ratio = lr/(lf+lr); // 1
+
+	// not used?
 	double length = 4.540; // car length in m
 	double width = 1.760; // car width in m
 	
@@ -146,9 +147,9 @@ int main( ){
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
     
-    f << dot(x) == v*cos(psi+delta);
-    f << dot(y) == v*sin(psi+delta);
-    f << dot(psi) == v/lr*sin(delta);
+    f << dot(x) == v*cos(psi+beta);
+    f << dot(y) == v*sin(psi+beta);
+    f << dot(psi) == v/lr*sin(beta);
     f << dot(v) == a;
     f << dot(s) == v;
 	f << dot(dummy) == sv;
@@ -298,9 +299,31 @@ int main( ){
 	//ocp.subjectTo(c_disc_4_obst_2 + sv >= 1);
 	//ocp.subjectTo(c_disc_5_obst_2 + sv >= 1);
 	ocp.subjectTo(sv >= 0);
-	
+
+	// road boundary cost
+	float road_offset_left = -4.24;
+	float road_offset_right = 1.88;
+	int steepness=15;
+	int intersect_cost=700;
+	int exp_addition=log(intersect_cost)/steepness;
 	//	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*((1/(deltaPos_disc_1_obstacle_1.transpose()*deltaPos_disc_1_obstacle_1+0.01))+((1/(deltaPos_disc_2_obstacle_1.transpose()*deltaPos_disc_2_obstacle_1+0.01)))+((1/(deltaPos_disc_3_obstacle_1.transpose()*deltaPos_disc_3_obstacle_1+0.01)))+(1/(deltaPos_disc_1_obstacle_2.transpose()*deltaPos_disc_1_obstacle_2+0.01))+((1/(deltaPos_disc_2_obstacle_2.transpose()*deltaPos_disc_2_obstacle_2+0.01)))+((1/(deltaPos_disc_3_obstacle_2.transpose()*deltaPos_disc_3_obstacle_2+0.01))))); // weight this with the physical cost!!!
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+10000*exp((road_boundary-2.15-1)/0.1)+10000*exp(-(road_boundary+5.12)/0.1));//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
+	//ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+10000*exp((road_boundary-2.15-1)/0.1)+10000*exp(-(road_boundary+5.12)/0.1));//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(
+	        Wx*error_contour*error_contour +
+            Wy*error_lag*error_lag +
+            Wv*(v-vref)*(v-vref) +
+            Wa*a*a+ Wdelta*(delta)*(delta)+
+            ws*sv+
+            wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+
+            wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+
+            wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+
+            wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+
+            wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+
+            wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))//+
+            //exp((road_boundary-road_offset_right+exp_addition)*steepness)+
+            //exp(-(road_boundary-road_offset_left-exp_addition)/steepness)
+            );//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
+
 	ocp.setModel(f);
 
 
