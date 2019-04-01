@@ -395,6 +395,7 @@ returnValue OCP::minimizeLSQ(const DMatrix& S, const std::string& h)
 
 returnValue OCP::minimizeLSQEndTerm(const DMatrix& S, const std::string& h)
 {
+	std::cout<<"minimizeLSQEndTerm: "<< objective->addLSQEndTerm(S, h) << "\n";
 	return objective->addLSQEndTerm(S, h);
 }
 

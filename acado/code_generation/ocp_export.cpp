@@ -660,6 +660,10 @@ returnValue OCPexport::checkConsistency( ) const
 	ocp.getObjective( objective );
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	std::cout << "objective.getNumMayerTerms()" << objective.getNumMayerTerms() << "\n";
+	std::cout << "objective.getNumLagrangeTerms()" << objective.getNumLagrangeTerms()<< "\n";
+    std::cout << "ocp.hasObjective( )" << ocp.hasObjective( )<< "\n";
+    std::cout << "hessianApproximation" << hessianApproximation<< "\n";
 
  	if ( ocp.hasObjective( ) == true && !((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN &&
  			(objective.getNumMayerTerms() == 1 || objective.getNumLagrangeTerms() == 1)) ) { // for Exact Hessian RTI

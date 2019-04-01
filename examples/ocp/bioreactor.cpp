@@ -32,6 +32,7 @@ s file is part of ACADO Toolkit.
 #include <acado_optimal_control.hpp>
 #include <acado_gnuplot.hpp>
 #include <acado_code_generation.hpp>
+#include <acado/utils/acado_types.hpp>
 
 /* >>> start tutorial code >>> */
 int main( ){
@@ -44,7 +45,7 @@ int main( ){
     Control               v,w;
     DifferentialEquation  f;
 
-    OnlineData x_goal;
+    /*OnlineData x_goal;
     OnlineData y_goal;
     OnlineData theta_goal;
 
@@ -55,26 +56,57 @@ int main( ){
 	OnlineData Ww;
 
 	OnlineData vref;
-
+*/
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
-    
+
     f << dot(x) == v*cos(theta);
     f << dot(y) == v*sin(theta);
     f << dot(theta) == w;
+
     //f << dot(v) == a;
 	//f << dot(dummy1) == sv1;
     //f << dot(dummy2) == sv2;
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
-    OCP ocp( 0.0, 20, 100.0 );
+    OCP ocp( 0.0, 20, 20 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(35);
+    //ocp.setNOD(9);
 
-	ocp.minimizeLagrangeTerm(Wx*(x-x_goal)*(x-x_goal) +Wy*(y-y_goal)*(y-y_goal)+ Wtheta*(theta-theta_goal)*(theta-theta_goal)); //
-    ocp.minimizeMayerTerm(Wx*(x-x_goal)*(x-x_goal) +Wy*(y-y_goal)*(y-y_goal)+ Wtheta*(theta-theta_goal)*(theta-theta_goal)); //
+    Function h;
+    Function h_final;
+    h << x-0.5;
+    h << y-0.5;
+    h << theta;
+
+    h_final << x;
+    h_final << y;
+
+    DMatrix Q(3,3); // LSQ coefficient matrix
+    Q(0,0) = 5;
+    Q(1,1) = 5;
+    Q(2,2) = 5;
+
+    DMatrix Q_final(2,2); // LSQ coefficient matrix
+    Q_final(0,0) = 5;
+    Q_final(1,1) = 5;
+
+    DVector r(3); // Reference
+    r(0)=0.5;
+    r(1)=0.5;
+    r(2)=0;
+
+    DVector r_final(2); // Reference
+    r(0)=0.5;
+    r(1)=0.5;
+    r(2)=0;
+
+    //ocp.minimizeLSQ( Q, h);
+    //ocp.minimizeLSQEndTerm( Q_final, h_final);
+	ocp.minimizeLagrangeTerm(1*(x-0.5)*(x-0.5) +1*(y-0.5)*(y-0.5)); //
+    ocp.minimizeMayerTerm(1*(x-0.5)*(x-0.5) +1*(y-0.5)*(y-0.5)); //
 
     ocp.setModel(f);
 
@@ -88,29 +120,29 @@ int main( ){
 
     // DEFINE AN MPC EXPORT MODULE AND GENERATE THE CODE:
 	// ----------------------------------------------------------
-/*
+
 	OCPexport mpc( ocp );
 
-	mpc.set( HESSIAN_APPROXIMATION,            EXACT_HESSIAN  		);
-	mpc.set( DISCRETIZATION_TYPE,              MULTIPLE_SHOOTING 	);
-	mpc.set( INTEGRATOR_TYPE,                  INT_RK4			    );
-	mpc.set( NUM_INTEGRATOR_STEPS,             25            		);
-	mpc.set( QP_SOLVER,                        QP_QPOASES    		);
-	mpc.set( HOTSTART_QP,                      NO             		);
-	mpc.set( GENERATE_TEST_FILE,               YES            		);
-	mpc.set( GENERATE_MAKE_FILE,               YES            		);
-	mpc.set( GENERATE_MATLAB_INTERFACE,        NO            		);
-	mpc.set( SPARSE_QP_SOLUTION, 		       FULL_CONDENSING_N2	);
-	mpc.set( DYNAMIC_SENSITIVITY, 		       SYMMETRIC			);
-	mpc.set( CG_HARDCODE_CONSTRAINT_VALUES,    NO 					);
-	mpc.set( CG_USE_VARIABLE_WEIGHTING_MATRIX, YES 					);
-
+    mpc.set( HESSIAN_APPROXIMATION,       EXACT_HESSIAN  		);
+    mpc.set( DISCRETIZATION_TYPE,         COLLOCATION 	);
+    mpc.set( INTEGRATOR_TYPE,             INT_RK4   			);
+    mpc.set( NUM_INTEGRATOR_STEPS,        20            		);
+    mpc.set( QP_SOLVER,                   QP_QPOASES    		);
+    mpc.set( HOTSTART_QP,                 NO             		);
+    mpc.set( GENERATE_TEST_FILE,          NO            		);
+    mpc.set( GENERATE_MAKE_FILE,          NO            		);
+    mpc.set( GENERATE_MATLAB_INTERFACE,   YES            		);
+    mpc.set( SPARSE_QP_SOLUTION, 		  FULL_CONDENSING_N2	);
+    mpc.set( GLOBALIZATION_STRATEGY, GS_FULLSTEP );
+    mpc.set( DYNAMIC_SENSITIVITY, 		  SYMMETRIC				);
+    mpc.set( CG_HARDCODE_CONSTRAINT_VALUES, NO 					);
+    mpc.set( CG_USE_VARIABLE_WEIGHTING_MATRIX, YES 				);
 	mpc.exportCode( "ocp" );
 	mpc.printDimensionsQP( );
-*/
-    ocp.subjectTo( AT_START, x  == 0.9 );
-    ocp.subjectTo( AT_START, y  == 0.3 );
-    ocp.subjectTo( AT_START, theta  == -1.57 );
+/**/
+    ocp.subjectTo( AT_START, x  == 0.929 );
+    ocp.subjectTo( AT_START, y  == 0.21 );
+    ocp.subjectTo( AT_START, theta  == -1.21 );
     //ocp.subjectTo( AT_START, v  == 0.0 );
     //ocp.subjectTo( AT_START, w == 0.0 );
     double wx = 100;
@@ -119,12 +151,12 @@ int main( ){
     double xgoal = 0.5;
     double ygoal = 0.5;
     double thetagoal = 0;
-    ocp.minimizeLagrangeTerm(v*v+w*w);//wx*(x-xgoal)*(x-xgoal) +wy*(y-ygoal)*(y-ygoal)+ wtheta*(theta-thetagoal)*(theta-thetagoal)); //
-    ocp.minimizeMayerTerm(wx*(x-xgoal)*(x-xgoal) +wy*(y-ygoal)*(y-ygoal)+ wtheta*(theta-thetagoal)*(theta-thetagoal)); //
+    //ocp.minimizeLagrangeTerm(wx*(x-xgoal)*(x-xgoal) +wy*(y-ygoal)*(y-ygoal));//wx*(x-xgoal)*(x-xgoal) +wy*(y-ygoal)*(y-ygoal)+ wtheta*(theta-thetagoal)*(theta-thetagoal)); //
+    //ocp.minimizeMayerTerm(wx*(x-xgoal)*(x-xgoal) +wy*(y-ygoal)*(y-ygoal)+ wtheta*(theta-thetagoal)*(theta-thetagoal)); //
     // Additionally, flush a plotting object
 
     GnuplotWindow window1;//( PLOT_AT_EACH_ITERATION );
-    window1.addSubplot( x,y, " X [m]" );
+    window1.addSubplot( x, " X [m]" );
     window1.addSubplot( y," Y [m]" );
     window1.addSubplot( theta," Theta [m]" );
     window1.addSubplot( v, "Velocity [m/s]" );
@@ -142,12 +174,12 @@ int main( ){
     algorithm.set( DISCRETIZATION_TYPE,              MULTIPLE_SHOOTING 	);
    // algorithm.set( INTEGRATOR_TYPE,                  INT_RK4			    );
     //algorithm.set( NUM_INTEGRATOR_STEPS,             25            		);
-    algorithm.set( QP_SOLVER,                        QP_QPOASES3    		);
+    algorithm.set( QP_SOLVER,                        QP_QPOASES    		);
     //algorithm.set( HOTSTART_QP,                      NO             		);
     //algorithm.set( SPARSE_QP_SOLUTION, 		       FULL_CONDENSING_N2	);
     //algorithm.set( INTEGRATOR_TOLERANCE, 1e-8 );
-    algorithm.set( KKT_TOLERANCE, 1e-9 );
-    //algorithm.set( GLOBALIZATION_STRATEGY, GS_FULLSTEP );
+    algorithm.set( KKT_TOLERANCE, 1e-5 );
+    algorithm.set( GLOBALIZATION_STRATEGY, GS_FULLSTEP );
     //algorithm.set( MAX_NUM_ITERATIONS, 1 );
 
     algorithm.solve();

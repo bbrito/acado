@@ -1,7 +1,7 @@
  #ifndef ACADO_TOOLKIT_TEMPLATES_HPP 
  #define ACADO_TOOLKIT_TEMPLATES_HPP 
 
- #define TEMPLATE_PATHS "/home/bdebrito/code/ACADOtoolkit/interfaces/matlab/../../acado/code_generation/templates" 
+ #define TEMPLATE_PATHS "/home/bdebrito/ACADOtoolkit/interfaces/matlab/../../acado/code_generation/templates" 
 
  #define INTEGRATOR_MEX_TEMPLATE "integrator_mex.c.in" 
 
