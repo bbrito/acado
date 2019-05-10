@@ -80,15 +80,6 @@ int main( ){
 	OnlineData c_Y4;
 	OnlineData d_Y4;
 
-	OnlineData a_X5;
-	OnlineData b_X5;
-	OnlineData c_X5;
-	OnlineData d_X5;
-	OnlineData a_Y5;
-	OnlineData b_Y5;
-	OnlineData c_Y5;
-	OnlineData d_Y5;
-
 	OnlineData Wx;
 	OnlineData Wy;
 	OnlineData Wv;
@@ -98,41 +89,29 @@ int main( ){
 	OnlineData s02;
 	OnlineData s03;
 	OnlineData s04;
-	OnlineData s05;
 
-	OnlineData vref1;
-	OnlineData vref2;
-	OnlineData vref3;
-	OnlineData vref4;
-	OnlineData vref5;
+	OnlineData vref;
 
 	OnlineData delta1;
 	OnlineData delta2;
 	OnlineData delta3;
-	OnlineData delta4;
 
 	OnlineData ws;
 	OnlineData wP;
 
-	OnlineData r_disc;
-	OnlineData disc_pos;
+	double r_disc = 0.5;
 
 	OnlineData obst1_x;
 	OnlineData obst1_y;
 	OnlineData obst1_theta;
-	OnlineData obst1_major;
-	OnlineData obst1_minor;
+	double obst1_major=0.4;
+	double obst1_minor=0.4;
 
 	OnlineData obst2_x;
 	OnlineData obst2_y;
 	OnlineData obst2_theta;
-	OnlineData obst2_major;
-	OnlineData obst2_minor;
-
-	OnlineData theta_target;
-	OnlineData Wtheta;
-	OnlineData collision_free_ymin;
-	OnlineData collision_free_ymax;
+	double obst2_major=0.4;
+	double obst2_minor=0.4;
 
 	OnlineData collision_free_a1x;
 	OnlineData collision_free_a2x;
@@ -152,7 +131,6 @@ int main( ){
 	Expression lambda1 = 1/(1 + exp((s - delta1)/0.1));
 	Expression lambda2 = 1/(1 + exp((s - delta2)/0.1));
 	Expression lambda3 = 1/(1 + exp((s - delta3)/0.1));
-	Expression lambda4 = 1/(1 + exp((s - delta4)/0.1));
 
 	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
 	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
@@ -174,21 +152,14 @@ int main( ){
 	Expression dx_path4 = (3*a_X4*(s-s04)*(s-s04) + 2*b_X4*(s-s04) + c_X4) ;
 	Expression dy_path4 = (3*a_Y4*(s-s04)*(s-s04) + 2*b_Y4*(s-s04) + c_Y4) ;
 
-	Expression x_path5 = (a_X5*(s-s05)*(s-s05)*(s-s05) + b_X5*(s-s05)*(s-s05) + c_X5*(s-s05) + d_X5) ;
-	Expression y_path5 = (a_Y5*(s-s05)*(s-s05)*(s-s05) + b_Y5*(s-s05)*(s-s05) + c_Y5*(s-s05) + d_Y5) ;
-	Expression dx_path5 = (3*a_X5*(s-s05)*(s-s05) + 2*b_X5*(s-s05) + c_X5) ;
-	Expression dy_path5 = (3*a_Y5*(s-s05)*(s-s05) + 2*b_Y5*(s-s05) + c_Y5) ;
-
-	Expression x_path = lambda1*lambda2*lambda3*lambda4*x_path1 + (1 - lambda1)*lambda2*lambda3*lambda4*x_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*x_path3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*x_path4 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*x_path5;
-	Expression y_path = lambda1*lambda2*lambda3*lambda4*y_path1 + (1 - lambda1)*lambda2*lambda3*lambda4*y_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*y_path3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*y_path4 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*y_path5;
-	Expression dx_path = lambda1*lambda2*lambda3*lambda4*dx_path1 + (1 - lambda1)*lambda2*lambda3*lambda4*dx_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*dx_path3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*dx_path4 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*dx_path5;
-	Expression dy_path = lambda1*lambda2*lambda3*lambda4*dy_path1 + (1 - lambda1)*lambda2*lambda3*lambda4*dy_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*dy_path3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*dy_path4 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*dy_path5;
+	Expression x_path = lambda1*lambda2*lambda3*x_path1 + (1 - lambda1)*lambda2*lambda3*x_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*x_path3;
+	Expression y_path = lambda1*lambda2*lambda3*y_path1 + (1 - lambda1)*lambda2*lambda3*y_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*y_path3;
+	Expression dx_path = lambda1*lambda2*lambda3*dx_path1 + (1 - lambda1)*lambda2*lambda3*dx_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*dx_path3;
+	Expression dy_path = lambda1*lambda2*lambda3*dy_path1 + (1 - lambda1)*lambda2*lambda3*dy_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*dy_path3;
 
 	Expression abs_grad = sqrt(dx_path.getPowInt(2) + dy_path.getPowInt(2));
 	Expression dx_path_norm = dx_path/abs_grad;
 	Expression dy_path_norm =  dy_path/abs_grad;
-
-	Expression vref = lambda1*lambda2*lambda3*lambda4*vref1 + (1 - lambda1)*lambda2*lambda3*lambda4*vref2 + (1 - lambda1)*(1 - lambda2)*lambda3*lambda4*vref3 + (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*lambda4*vref4 +  (1 - lambda1)*(1 - lambda2)*(1 - lambda3)*(1 - lambda4)*vref5;
 
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
@@ -202,16 +173,16 @@ int main( ){
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
-    OCP ocp( 0.0, 5, 25.0 );
+    OCP ocp( 0.0, 3, 15 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(88);
+    ocp.setNOD(64);
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
 
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref)+Wtheta*(theta-theta_target)*(theta-theta_target) + wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref)+ wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
 	ocp.setModel(f);
 
     ocp.subjectTo( -2.0 <= v <= 2.0 );
@@ -271,7 +242,7 @@ int main( ){
 	mpc.set( HESSIAN_APPROXIMATION,            EXACT_HESSIAN  		);
 	mpc.set( DISCRETIZATION_TYPE,              MULTIPLE_SHOOTING 	);
 	mpc.set( INTEGRATOR_TYPE,                  INT_RK4			    );
-	mpc.set( NUM_INTEGRATOR_STEPS,             25            		);
+	mpc.set( NUM_INTEGRATOR_STEPS,             10            		);
 	mpc.set( QP_SOLVER,                        QP_QPOASES    		);
 	mpc.set( HOTSTART_QP,                      NO             		);
 	mpc.set( GENERATE_TEST_FILE,               YES            		);
