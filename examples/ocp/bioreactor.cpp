@@ -164,12 +164,12 @@ int main( ){
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
     
-    f << dot(x) == v*cos(theta);
-    f << dot(y) == v*sin(theta);
-    f << dot(theta) == w;
-	f << dot(s) == v;
-	f << dot(dummy1) == sv1;
-    f << dot(dummy2) == sv2;
+    f << next(x) == v*cos(theta);
+    f << next(y) == v*sin(theta);
+    f << next(theta) == w;
+	f << next(s) == v;
+	f << next(dummy1) == sv1;
+    f << next(dummy2) == sv2;
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
