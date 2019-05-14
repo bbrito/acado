@@ -128,6 +128,13 @@ int main( ){
 	OnlineData collision_free_C3;
 	OnlineData collision_free_C4;
 
+	// obstacle 3 is down here because of historical reasons only
+    OnlineData obst3_x;
+    OnlineData obst3_y;
+    OnlineData obst3_theta;
+    double obst3_major=0.4;
+    double obst3_minor=0.4;
+
 	Expression lambda1 = 1/(1 + exp((s - delta1)/0.1));
 	Expression lambda2 = 1/(1 + exp((s - delta2)/0.1));
 	Expression lambda3 = 1/(1 + exp((s - delta3)/0.1));
@@ -176,7 +183,7 @@ int main( ){
     OCP ocp( 0.0, 3, 15 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(64);
+    ocp.setNOD(67); // before adding additional obstacle 64
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
@@ -203,6 +210,12 @@ int main( ){
 	ab_2(1,1) = 1/((obst2_minor + r_disc)*(obst2_minor + r_disc));
 	ab_2(1,0) = 0;
 
+    Expression ab_3(2,2);
+    ab_3(0,0) = 1/((obst3_major + r_disc)*(obst3_major + r_disc));
+    ab_3(0,1) = 0;
+    ab_3(1,1) = 1/((obst3_minor + r_disc)*(obst3_minor + r_disc));
+    ab_3(1,0) = 0;
+
 	Expression R_obst_1(2,2);
 	R_obst_1(0,0) = cos(obst1_theta);
 	R_obst_1(0,1) = -sin(obst1_theta);
@@ -215,6 +228,12 @@ int main( ){
 	R_obst_2(1,0) = sin(obst2_theta);
 	R_obst_2(1,1) = cos(obst2_theta);
 
+    Expression R_obst_3(2,2);
+    R_obst_3(0,0) = cos(obst3_theta);
+    R_obst_3(0,1) = -sin(obst3_theta);
+    R_obst_3(1,0) = sin(obst3_theta);
+    R_obst_3(1,1) = cos(obst3_theta);
+
 	Expression deltaPos_disc_1(2,1);
 	deltaPos_disc_1(0) =  x - obst1_x;
 	deltaPos_disc_1(1) =  y - obst1_y;
@@ -223,12 +242,18 @@ int main( ){
 	deltaPos_disc_2(0) =  x - obst2_x;
 	deltaPos_disc_2(1) =  y - obst2_y;
 
-	Expression c_obst_1, c_obst_2;
+    Expression deltaPos_disc_3(2,1);
+    deltaPos_disc_3(0) =  x - obst3_x;
+    deltaPos_disc_3(1) =  y - obst3_y;
+
+	Expression c_obst_1, c_obst_2, c_obst_3;
 	c_obst_1 = deltaPos_disc_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_1;
 	c_obst_2 = deltaPos_disc_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_2;
+    c_obst_3 = deltaPos_disc_3.transpose() * R_obst_3.transpose() * ab_3 * R_obst_3 * deltaPos_disc_3;
 
 	ocp.subjectTo(c_obst_1 + sv1 >= 1);
 	ocp.subjectTo(c_obst_2 + sv1 >= 1);
+    ocp.subjectTo(c_obst_3 + sv1 >= 1);
 
     ocp.subjectTo( x*collision_free_a1x + y*collision_free_a1y - collision_free_C1 + sv2 >= 0 );
     ocp.subjectTo( x*collision_free_a2x + y*collision_free_a2y - collision_free_C2 + sv2 >= 0 );
