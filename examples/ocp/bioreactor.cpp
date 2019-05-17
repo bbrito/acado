@@ -92,26 +92,8 @@ int main( ){
 
 	OnlineData vref;
 
-	OnlineData delta1;
-	OnlineData delta2;
-	OnlineData delta3;
-
 	OnlineData ws;
 	OnlineData wP;
-
-	double r_disc = 0.5;
-
-	OnlineData obst1_x;
-	OnlineData obst1_y;
-	OnlineData obst1_theta;
-	double obst1_major=0.4;
-	double obst1_minor=0.4;
-
-	OnlineData obst2_x;
-	OnlineData obst2_y;
-	OnlineData obst2_theta;
-	double obst2_major=0.4;
-	double obst2_minor=0.4;
 
 	OnlineData collision_free_a1x;
 	OnlineData collision_free_a2x;
@@ -128,6 +110,20 @@ int main( ){
 	OnlineData collision_free_C3;
 	OnlineData collision_free_C4;
 
+	double r_disc = 0.5;
+
+	OnlineData obst1_x;
+	OnlineData obst1_y;
+	OnlineData obst1_theta;
+	double obst1_major=0.4;
+	double obst1_minor=0.4;
+
+	OnlineData obst2_x;
+	OnlineData obst2_y;
+	OnlineData obst2_theta;
+	double obst2_major=0.4;
+	double obst2_minor=0.4;
+
 	// obstacle 3 is down here because of historical reasons only
     OnlineData obst3_x;
     OnlineData obst3_y;
@@ -141,9 +137,21 @@ int main( ){
 	double obst4_major=0.4;
 	double obst4_minor=0.4;
 
-	Expression lambda1 = 1/(1 + exp((s - delta1)/0.1));
-	Expression lambda2 = 1/(1 + exp((s - delta2)/0.1));
-	Expression lambda3 = 1/(1 + exp((s - delta3)/0.1));
+    OnlineData obst5_x;
+    OnlineData obst5_y;
+    OnlineData obst5_theta;
+    double obst5_major=0.4;
+    double obst5_minor=0.4;
+
+    OnlineData obst6_x;
+    OnlineData obst6_y;
+    OnlineData obst6_theta;
+    double obst6_major=0.4;
+    double obst6_minor=0.4;
+
+	Expression lambda1 = 1/(1 + exp((s - s02+0.02)/0.1));// maybe is wrong
+	Expression lambda2 = 1/(1 + exp((s - s03+0.02)/0.1));
+	Expression lambda3 = 1/(1 + exp((s - s04+0.02)/0.1));
 
 	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
 	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
@@ -189,14 +197,15 @@ int main( ){
     OCP ocp( 0.0, 3, 15 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(70); // before adding additional obstacle 64
+    ocp.setNOD(73); // before adding additional obstacle 64
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
 
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref)+ wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
-	ocp.setModel(f);
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref));//+ wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
+    //ocp.minimizeMayerTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag);
+    ocp.setModel(f);
 
     ocp.subjectTo( -2.0 <= v <= 2.0 );
     ocp.subjectTo( -1.0 <= w <= 1.0 );
@@ -205,28 +214,10 @@ int main( ){
 	// ---------------------------------------
 
 	Expression ab_1(2,2);
-	ab_1(0,0) = 1/((obst1_major + r_disc)*(obst1_major + r_disc));
+	ab_1(0,0) = 1.234;
 	ab_1(0,1) = 0;
-	ab_1(1,1) = 1/((obst1_minor + r_disc)*(obst1_minor + r_disc));
+	ab_1(1,1) = 1.234;
 	ab_1(1,0) = 0;
-
-	Expression ab_2(2,2);
-	ab_2(0,0) = 1/((obst2_major + r_disc)*(obst2_major + r_disc));
-	ab_2(0,1) = 0;
-	ab_2(1,1) = 1/((obst2_minor + r_disc)*(obst2_minor + r_disc));
-	ab_2(1,0) = 0;
-
-    Expression ab_3(2,2);
-    ab_3(0,0) = 1/((obst3_major + r_disc)*(obst3_major + r_disc));
-    ab_3(0,1) = 0;
-    ab_3(1,1) = 1/((obst3_minor + r_disc)*(obst3_minor + r_disc));
-    ab_3(1,0) = 0;
-
-	Expression ab_4(2,2);
-	ab_4(0,0) = 1/((obst4_major + r_disc)*(obst4_major + r_disc));
-	ab_4(0,1) = 0;
-	ab_4(1,1) = 1/((obst4_minor + r_disc)*(obst4_minor + r_disc));
-	ab_4(1,0) = 0;
 
 	Expression R_obst_1(2,2);
 	R_obst_1(0,0) = cos(obst1_theta);
@@ -252,6 +243,18 @@ int main( ){
 	R_obst_4(1,0) = sin(obst4_theta);
 	R_obst_4(1,1) = cos(obst4_theta);
 
+    Expression R_obst_5(2,2);
+    R_obst_5(0,0) = cos(obst5_theta);
+    R_obst_5(0,1) = -sin(obst5_theta);
+    R_obst_5(1,0) = sin(obst5_theta);
+    R_obst_5(1,1) = cos(obst5_theta);
+
+    Expression R_obst_6(2,2);
+    R_obst_6(0,0) = cos(obst6_theta);
+    R_obst_6(0,1) = -sin(obst6_theta);
+    R_obst_6(1,0) = sin(obst6_theta);
+    R_obst_6(1,1) = cos(obst6_theta);
+
 	Expression deltaPos_disc_1(2,1);
 	deltaPos_disc_1(0) =  x - obst1_x;
 	deltaPos_disc_1(1) =  y - obst1_y;
@@ -268,16 +271,29 @@ int main( ){
     deltaPos_disc_4(0) =  x - obst4_x;
     deltaPos_disc_4(1) =  y - obst4_y;
 
-	Expression c_obst_1, c_obst_2, c_obst_3, c_obst_4;
+    Expression deltaPos_disc_5(2,1);
+    deltaPos_disc_5(0) =  x - obst5_x;
+    deltaPos_disc_5(1) =  y - obst5_y;
+
+    Expression deltaPos_disc_6(2,1);
+    deltaPos_disc_6(0) =  x - obst6_x;
+    deltaPos_disc_6(1) =  y - obst6_y;
+
+	Expression c_obst_1, c_obst_2, c_obst_3, c_obst_4,c_obst_5, c_obst_6;
 	c_obst_1 = deltaPos_disc_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_1;
-	c_obst_2 = deltaPos_disc_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_2;
-    c_obst_3 = deltaPos_disc_3.transpose() * R_obst_3.transpose() * ab_3 * R_obst_3 * deltaPos_disc_3;
-	c_obst_4 = deltaPos_disc_4.transpose() * R_obst_4.transpose() * ab_4 * R_obst_4 * deltaPos_disc_4;
+	c_obst_2 = deltaPos_disc_2.transpose() * R_obst_2.transpose() * ab_1 * R_obst_2 * deltaPos_disc_2;
+    c_obst_3 = deltaPos_disc_3.transpose() * R_obst_3.transpose() * ab_1 * R_obst_3 * deltaPos_disc_3;
+	c_obst_4 = deltaPos_disc_4.transpose() * R_obst_4.transpose() * ab_1 * R_obst_4 * deltaPos_disc_4;
+    c_obst_5 = deltaPos_disc_5.transpose() * R_obst_5.transpose() * ab_1 * R_obst_5 * deltaPos_disc_5;
+    c_obst_6 = deltaPos_disc_6.transpose() * R_obst_6.transpose() * ab_1 * R_obst_6 * deltaPos_disc_6;
 
 	ocp.subjectTo(c_obst_1 + sv1 >= 1);
 	ocp.subjectTo(c_obst_2 + sv1 >= 1);
     ocp.subjectTo(c_obst_3 + sv1 >= 1);
 	ocp.subjectTo(c_obst_4 + sv1 >= 1);
+    ocp.subjectTo(c_obst_5 + sv1 >= 1);
+    ocp.subjectTo(c_obst_6 + sv1 >= 1);
+    ocp.subjectTo(sv1 >= 0);
 
     ocp.subjectTo( x*collision_free_a1x + y*collision_free_a1y - collision_free_C1 + sv2 >= 0 );
     ocp.subjectTo( x*collision_free_a2x + y*collision_free_a2y - collision_free_C2 + sv2 >= 0 );
