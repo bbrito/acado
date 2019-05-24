@@ -110,44 +110,40 @@ int main( ){
 	OnlineData collision_free_C3;
 	OnlineData collision_free_C4;
 
-	double r_disc = 0.5;
+	double r_disc = 0.33;
 
 	OnlineData obst1_x;
 	OnlineData obst1_y;
 	OnlineData obst1_theta;
-	double obst1_major=0.4;
-	double obst1_minor=0.4;
+	double obst1_major=0.3;
+	double obst1_minor=0.3;
 
 	OnlineData obst2_x;
 	OnlineData obst2_y;
 	OnlineData obst2_theta;
-	double obst2_major=0.4;
-	double obst2_minor=0.4;
 
-	// obstacle 3 is down here because of historical reasons only
+/*
+*/
     OnlineData obst3_x;
     OnlineData obst3_y;
     OnlineData obst3_theta;
-    double obst3_major=0.4;
-    double obst3_minor=0.4;
+
+
 
 	OnlineData obst4_x;
 	OnlineData obst4_y;
 	OnlineData obst4_theta;
-	double obst4_major=0.4;
-	double obst4_minor=0.4;
+
 
     OnlineData obst5_x;
     OnlineData obst5_y;
     OnlineData obst5_theta;
-    double obst5_major=0.4;
-    double obst5_minor=0.4;
+
 
     OnlineData obst6_x;
     OnlineData obst6_y;
     OnlineData obst6_theta;
-    double obst6_major=0.4;
-    double obst6_minor=0.4;
+
 
 	Expression lambda1 = 1/(1 + exp((s - s02+0.02)/0.1));// maybe is wrong
 	Expression lambda2 = 1/(1 + exp((s - s03+0.02)/0.1));
@@ -203,7 +199,7 @@ int main( ){
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
 
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref));//+ wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.0001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.0001)))); // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref)+ wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.001))+(1/((x-obst3_x)*(x-obst3_x)+(y-obst3_y)*(y-obst3_y)+0.001)) + (1/((x-obst4_x)*(x-obst4_x)+(y-obst4_y)*(y-obst4_y)+0.0001)))+(1/((x-obst5_x)*(x-obst5_x)+(y-obst5_y)*(y-obst5_y)+0.0001)) + (1/((x-obst6_x)*(x-obst6_x)+(y-obst6_y)*(y-obst6_y)+0.0001))); // weight this with the physical cost!!!
     //ocp.minimizeMayerTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag);
     ocp.setModel(f);
 
@@ -230,7 +226,7 @@ int main( ){
 	R_obst_2(0,1) = -sin(obst2_theta);
 	R_obst_2(1,0) = sin(obst2_theta);
 	R_obst_2(1,1) = cos(obst2_theta);
-
+/**/
     Expression R_obst_3(2,2);
     R_obst_3(0,0) = cos(obst3_theta);
     R_obst_3(0,1) = -sin(obst3_theta);
@@ -262,7 +258,7 @@ int main( ){
 	Expression deltaPos_disc_2(2,1);
 	deltaPos_disc_2(0) =  x - obst2_x;
 	deltaPos_disc_2(1) =  y - obst2_y;
-
+/**/
     Expression deltaPos_disc_3(2,1);
     deltaPos_disc_3(0) =  x - obst3_x;
     deltaPos_disc_3(1) =  y - obst3_y;
