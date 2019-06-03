@@ -79,8 +79,7 @@ int main( ){
 	OnlineData Wdelta;
 
 	// vref1, vref2: to define the desired reference speed
-	OnlineData vref1;
-	OnlineData vref2;
+	OnlineData vref;
 
 	// ws: weight on the slack variable sv
 	OnlineData ws;
@@ -131,8 +130,6 @@ int main( ){
 	Expression dx_path_norm = dx_path/abs_grad;
 	Expression dy_path_norm =  dy_path/abs_grad;
 
-	Expression vref = lambda*vref1 + (1 - lambda)*vref2;
-
 	double lf=1.123; // distance from center of mass of the vehicle to the front
 	double lr=1.577; // distance from center of mass of the vehicle to the rear
 	double ratio = lr/(lf+lr); // 1
@@ -141,15 +138,12 @@ int main( ){
 	//double length = 4.540; // car length in m
 	//double width = 1.760; // car width in m
 
-	IntermediateState beta;
-	beta = atan(ratio*tan(delta));
-
 	// DEFINE A DIFFERENTIAL EQUATION:
 	// -------------------------------
 
-	f << dot(x) == v*cos(psi+beta);
-	f << dot(y) == v*sin(psi+beta);
-	f << dot(psi) == v/lr*sin(beta);
+	f << dot(x) == v*cos(psi+delta);
+	f << dot(y) == v*sin(psi+delta);
+	f << dot(psi) == v/lr*sin(delta);
 	f << dot(v) == a;
 	f << dot(s) == v;
 	f << dot(dummy) == sv;
@@ -157,10 +151,10 @@ int main( ){
 	// DEFINE AN OPTIMAL CONTROL PROBLEM:
 	// ----------------------------------
 	// OCP ocp( 0.0, 5.0, 25.0 );
-	OCP ocp( 0.0, 5.0, 25.0 );
+	OCP ocp( 0.0, 4.0, 20.0 );
 
 	// Need to set the number of online variables!
-	ocp.setNOD(46);
+	ocp.setNOD(43);
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
