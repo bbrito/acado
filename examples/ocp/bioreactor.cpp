@@ -298,8 +298,10 @@ int main( ){
 	float road_offset_left = -4.24;
 	float road_offset_right = 1.88;
 	int steepness=5;
-	int intersect_cost=100;
-	int exp_addition=log(intersect_cost)/steepness;
+    int steepness_right=5;
+    int intersect_cost=100;
+    int exp_addition=log(intersect_cost)/steepness;
+    int exp_addition_right=log(intersect_cost)/steepness_right;
 	//	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*((1/(deltaPos_disc_1_obstacle_1.transpose()*deltaPos_disc_1_obstacle_1+0.01))+((1/(deltaPos_disc_2_obstacle_1.transpose()*deltaPos_disc_2_obstacle_1+0.01)))+((1/(deltaPos_disc_3_obstacle_1.transpose()*deltaPos_disc_3_obstacle_1+0.01)))+(1/(deltaPos_disc_1_obstacle_2.transpose()*deltaPos_disc_1_obstacle_2+0.01))+((1/(deltaPos_disc_2_obstacle_2.transpose()*deltaPos_disc_2_obstacle_2+0.01)))+((1/(deltaPos_disc_3_obstacle_2.transpose()*deltaPos_disc_3_obstacle_2+0.01))))); // weight this with the physical cost!!!
 	//ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag +Wv*(v-vref)*(v-vref) +Wa*a*a+ Wdelta*(delta)*(delta)+ws*sv+wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+10000*exp((road_boundary-2.15-1)/0.1)+10000*exp(-(road_boundary+5.12)/0.1));//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
 	ocp.minimizeLagrangeTerm(
@@ -314,7 +316,7 @@ int main( ){
 			wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+
 			wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+
 			wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+
-			exp((error_contour-road_offset_right+exp_addition-right_offset-0.6)*steepness)+
+			exp((error_contour-road_offset_right+exp_addition_right-right_offset)*steepness_right)+
 			exp(-(error_contour-road_offset_left-exp_addition+left_offset)*steepness)
 	);//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
 
