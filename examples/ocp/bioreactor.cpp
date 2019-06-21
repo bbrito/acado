@@ -226,12 +226,9 @@ int main( ){
 	deltaPos_disc_3_obstacle_2 =  position_disc_3 - CoG_obst2;
 
 
-
-
-
 	ocp.subjectTo( -6 <= a <= 1 );
 	ocp.subjectTo( -0.52 <= delta <= 0.52 );
-	ocp.subjectTo( 0 <= v <= 13.8 );
+	ocp.subjectTo( 0 <= v <= 30.0 );
 	//ocp.subjectTo( -10 <= jerk <= 10 );
 	//ocp.subjectTo( -0.5 <= delta_rate <= 0.5 );
 	// to test if the car stops with stricter road boundaries uncomment
