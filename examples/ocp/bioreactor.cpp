@@ -129,12 +129,11 @@ int main( ){
     OnlineData obst3_theta;
 
 
-
 	OnlineData obst4_x;
 	OnlineData obst4_y;
 	OnlineData obst4_theta;
 
-
+/*
     OnlineData obst5_x;
     OnlineData obst5_y;
     OnlineData obst5_theta;
@@ -144,10 +143,10 @@ int main( ){
     OnlineData obst6_y;
     OnlineData obst6_theta;
 
-
-	Expression lambda1 = 1/(1 + exp((s - s02+0.02)/0.1));// maybe is wrong
-	Expression lambda2 = 1/(1 + exp((s - s03+0.02)/0.1));
-	Expression lambda3 = 1/(1 + exp((s - s04+0.02)/0.1));
+*/
+	Expression lambda1 = 1/(1 + exp((s - s02-0.02)/0.1));// maybe is wrong
+	Expression lambda2 = 1/(1 + exp((s - s03-0.02)/0.1));
+	Expression lambda3 = 1/(1 + exp((s - s04-0.02)/0.1));
 
 	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
 	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
@@ -181,19 +180,19 @@ int main( ){
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
     
-    f << next(x) == v*cos(theta);
-    f << next(y) == v*sin(theta);
-    f << next(theta) == w;
-	f << next(s) == v;
-	f << next(dummy1) == sv1;
-    f << next(dummy2) == sv2;
+    f << dot(x) == v*cos(theta);
+    f << dot(y) == v*sin(theta);
+    f << dot(theta) == w;
+	f << dot(s) == v;
+	f << dot(dummy1) == sv1;
+    f << dot(dummy2) == sv2;
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
     OCP ocp( 0.0, 3, 15 );
 
     // Need to set the number of online variables!
-    ocp.setNOD(73); // before adding additional obstacle 64
+    ocp.setNOD(67); // before adding additional obstacle 64
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
@@ -238,7 +237,7 @@ int main( ){
 	R_obst_4(0,1) = -sin(obst4_theta);
 	R_obst_4(1,0) = sin(obst4_theta);
 	R_obst_4(1,1) = cos(obst4_theta);
-
+/*
     Expression R_obst_5(2,2);
     R_obst_5(0,0) = cos(obst5_theta);
     R_obst_5(0,1) = -sin(obst5_theta);
@@ -250,7 +249,7 @@ int main( ){
     R_obst_6(0,1) = -sin(obst6_theta);
     R_obst_6(1,0) = sin(obst6_theta);
     R_obst_6(1,1) = cos(obst6_theta);
-
+*/
 	Expression deltaPos_disc_1(2,1);
 	deltaPos_disc_1(0) =  x - obst1_x;
 	deltaPos_disc_1(1) =  y - obst1_y;
@@ -266,7 +265,7 @@ int main( ){
     Expression deltaPos_disc_4(2,1);
     deltaPos_disc_4(0) =  x - obst4_x;
     deltaPos_disc_4(1) =  y - obst4_y;
-
+	/*
     Expression deltaPos_disc_5(2,1);
     deltaPos_disc_5(0) =  x - obst5_x;
     deltaPos_disc_5(1) =  y - obst5_y;
@@ -274,27 +273,29 @@ int main( ){
     Expression deltaPos_disc_6(2,1);
     deltaPos_disc_6(0) =  x - obst6_x;
     deltaPos_disc_6(1) =  y - obst6_y;
+	*/
 
-	Expression c_obst_1, c_obst_2, c_obst_3, c_obst_4,c_obst_5, c_obst_6;
+	Expression c_obst_1, c_obst_2, c_obst_3, c_obst_4;//,c_obst_5, c_obst_6;
 	c_obst_1 = deltaPos_disc_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_1;
 	c_obst_2 = deltaPos_disc_2.transpose() * R_obst_2.transpose() * ab_1 * R_obst_2 * deltaPos_disc_2;
     c_obst_3 = deltaPos_disc_3.transpose() * R_obst_3.transpose() * ab_1 * R_obst_3 * deltaPos_disc_3;
 	c_obst_4 = deltaPos_disc_4.transpose() * R_obst_4.transpose() * ab_1 * R_obst_4 * deltaPos_disc_4;
-    c_obst_5 = deltaPos_disc_5.transpose() * R_obst_5.transpose() * ab_1 * R_obst_5 * deltaPos_disc_5;
-    c_obst_6 = deltaPos_disc_6.transpose() * R_obst_6.transpose() * ab_1 * R_obst_6 * deltaPos_disc_6;
+    //c_obst_5 = deltaPos_disc_5.transpose() * R_obst_5.transpose() * ab_1 * R_obst_5 * deltaPos_disc_5;
+    //c_obst_6 = deltaPos_disc_6.transpose() * R_obst_6.transpose() * ab_1 * R_obst_6 * deltaPos_disc_6;
 
 	ocp.subjectTo(c_obst_1 + sv1 >= 1);
 	ocp.subjectTo(c_obst_2 + sv1 >= 1);
     ocp.subjectTo(c_obst_3 + sv1 >= 1);
 	ocp.subjectTo(c_obst_4 + sv1 >= 1);
-    ocp.subjectTo(c_obst_5 + sv1 >= 1);
-    ocp.subjectTo(c_obst_6 + sv1 >= 1);
+    //ocp.subjectTo(c_obst_5 + sv1 >= 1);
+    //ocp.subjectTo(c_obst_6 + sv1 >= 1);
     ocp.subjectTo(sv1 >= 0);
 
     ocp.subjectTo( x*collision_free_a1x + y*collision_free_a1y - collision_free_C1 + sv2 >= 0 );
     ocp.subjectTo( x*collision_free_a2x + y*collision_free_a2y - collision_free_C2 + sv2 >= 0 );
     ocp.subjectTo( x*collision_free_a3x + y*collision_free_a3y - collision_free_C3 + sv2 >= 0 );
     ocp.subjectTo( x*collision_free_a4x + y*collision_free_a4y - collision_free_C4 + sv2 >= 0 );
+    ocp.subjectTo(sv2 >= 0);
 
     // DEFINE AN MPC EXPORT MODULE AND GENERATE THE CODE:
 	// ----------------------------------------------------------
