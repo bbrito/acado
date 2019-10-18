@@ -144,9 +144,9 @@ int main( ){
     OnlineData obst6_theta;
 
 */
-	Expression lambda1 = 1/(1 + exp((s - s02-0.02)/0.1));// maybe is wrong
-	Expression lambda2 = 1/(1 + exp((s - s03-0.02)/0.1));
-	Expression lambda3 = 1/(1 + exp((s - s04-0.02)/0.1));
+	Expression lambda1 = 1/(1 + exp((s - s02+0.02)/0.1));// maybe is wrong
+	Expression lambda2 = 1/(1 + exp((s - s03+0.02)/0.1));
+	Expression lambda3 = 1/(1 + exp((s - s04+0.02)/0.1));
 
 	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
 	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
@@ -198,7 +198,7 @@ int main( ){
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
 
-	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref));//+ wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.001))+(1/((x-obst3_x)*(x-obst3_x)+(y-obst3_y)*(y-obst3_y)+0.001)) + (1/((x-obst4_x)*(x-obst4_x)+(y-obst4_y)*(y-obst4_y)+0.0001))));//+(1/((x-obst5_x)*(x-obst5_x)+(y-obst5_y)*(y-obst5_y)+0.0001)) + (1/((x-obst6_x)*(x-obst6_x)+(y-obst6_y)*(y-obst6_y)+0.0001))); // weight this with the physical cost!!!
+	ocp.minimizeLagrangeTerm(Wx*error_contour*error_contour + ws*sv1*sv1 + ws*sv2*sv2 + Wy*error_lag*error_lag + Ww*w*w +Wv*(v-vref)*(v-vref)+ wP*((1/((x-obst1_x)*(x-obst1_x)+(y-obst1_y)*(y-obst1_y)+0.001)) + (1/((x-obst2_x)*(x-obst2_x)+(y-obst2_y)*(y-obst2_y)+0.001))+(1/((x-obst3_x)*(x-obst3_x)+(y-obst3_y)*(y-obst3_y)+0.001)) + (1/((x-obst4_x)*(x-obst4_x)+(y-obst4_y)*(y-obst4_y)+0.0001))));//+(1/((x-obst5_x)*(x-obst5_x)+(y-obst5_y)*(y-obst5_y)+0.0001)) + (1/((x-obst6_x)*(x-obst6_x)+(y-obst6_y)*(y-obst6_y)+0.0001))); // weight this with the physical cost!!!
     //ocp.minimizeMayerTerm(Wx*error_contour*error_contour + Wy*error_lag*error_lag);
     ocp.setModel(f);
 
@@ -283,18 +283,18 @@ int main( ){
     //c_obst_5 = deltaPos_disc_5.transpose() * R_obst_5.transpose() * ab_1 * R_obst_5 * deltaPos_disc_5;
     //c_obst_6 = deltaPos_disc_6.transpose() * R_obst_6.transpose() * ab_1 * R_obst_6 * deltaPos_disc_6;
 
-	//ocp.subjectTo(c_obst_1 + sv1 >= 1);
-	//ocp.subjectTo(c_obst_2 + sv1 >= 1);
-    //ocp.subjectTo(c_obst_3 + sv1 >= 1);
-	//ocp.subjectTo(c_obst_4 + sv1 >= 1);
+	ocp.subjectTo(c_obst_1 + sv1 >= 1);
+	ocp.subjectTo(c_obst_2 + sv1 >= 1);
+    ocp.subjectTo(c_obst_3 + sv1 >= 1);
+	ocp.subjectTo(c_obst_4 + sv1 >= 1);
     //ocp.subjectTo(c_obst_5 + sv1 >= 1);
     //ocp.subjectTo(c_obst_6 + sv1 >= 1);
     ocp.subjectTo(sv1 >= 0);
 
-    //ocp.subjectTo( x*collision_free_a1x + y*collision_free_a1y - collision_free_C1 + sv2 >= 0 );
-    //ocp.subjectTo( x*collision_free_a2x + y*collision_free_a2y - collision_free_C2 + sv2 >= 0 );
-    //ocp.subjectTo( x*collision_free_a3x + y*collision_free_a3y - collision_free_C3 + sv2 >= 0 );
-    //ocp.subjectTo( x*collision_free_a4x + y*collision_free_a4y - collision_free_C4 + sv2 >= 0 );
+    ocp.subjectTo( x*collision_free_a1x + y*collision_free_a1y - collision_free_C1 + sv2 >= 0 );
+    ocp.subjectTo( x*collision_free_a2x + y*collision_free_a2y - collision_free_C2 + sv2 >= 0 );
+    ocp.subjectTo( x*collision_free_a3x + y*collision_free_a3y - collision_free_C3 + sv2 >= 0 );
+    ocp.subjectTo( x*collision_free_a4x + y*collision_free_a4y - collision_free_C4 + sv2 >= 0 );
     ocp.subjectTo(sv2 >= 0);
 
     // DEFINE AN MPC EXPORT MODULE AND GENERATE THE CODE:
