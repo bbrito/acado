@@ -151,7 +151,7 @@ int main( ){
 	// DEFINE AN OPTIMAL CONTROL PROBLEM:
 	// ----------------------------------
 	// OCP ocp( 0.0, 5.0, 25.0 );
-	OCP ocp( 0.0, 4.0, 20.0 );
+	OCP ocp( 0.0, 3.0, 15.0 );
 
 	// Need to set the number of online variables!
 	ocp.setNOD(43);
@@ -233,8 +233,8 @@ int main( ){
 	//ocp.subjectTo( -0.5 <= delta_rate <= 0.5 );
 	// to test if the car stops with stricter road boundaries uncomment
 	//ocp.subjectTo(road_boundary  <= 1.5+.88);
-	ocp.subjectTo(road_boundary -left_offset<= 4.24);
-	ocp.subjectTo(-road_boundary-right_offset<= 1.88);
+	//ocp.subjectTo(road_boundary -left_offset<= 4.24);
+	//ocp.subjectTo(-road_boundary-right_offset<= 1.88);
 
 	// DEFINE COLLISION CONSTRAINTS:
 	// ---------------------------------------
@@ -312,9 +312,9 @@ int main( ){
 			wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+
 			wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+
 			wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+
-			wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))+
-			exp((error_contour-road_offset_right+exp_addition_right-right_offset)*steepness_right)+
-			exp(-(error_contour-road_offset_left-exp_addition+left_offset)*steepness)
+			wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))
+			//exp((error_contour-road_offset_right+exp_addition_right-right_offset)*steepness_right)+
+			//exp(-(error_contour-road_offset_left-exp_addition+left_offset)*steepness)
 	);//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
 
 	ocp.setModel(f);
