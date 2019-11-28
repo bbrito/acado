@@ -63,8 +63,28 @@ int main( ){
 	OnlineData c_Y2;
 	OnlineData d_Y2;
 
+    OnlineData a_X3;
+    OnlineData b_X3;
+    OnlineData c_X3;
+    OnlineData d_X3;
+    OnlineData a_Y3;
+    OnlineData b_Y3;
+    OnlineData c_Y3;
+    OnlineData d_Y3;
+
+    OnlineData a_X4;
+    OnlineData b_X4;
+    OnlineData c_X4;
+    OnlineData d_X4;
+    OnlineData a_Y4;
+    OnlineData b_Y4;
+    OnlineData c_Y4;
+    OnlineData d_Y4;
+
 	OnlineData s01;
 	OnlineData s02;
+    OnlineData s03;
+    OnlineData s04;
 
 	// d: used to evaluate lambda (equivalent of delta in the Jackal version)
 	OnlineData d;
@@ -110,6 +130,9 @@ int main( ){
 	OnlineData left_offset;
 
 	Expression lambda = 1/(1 + exp((s - d)/0.1));
+    Expression lambda1 = 1/(1 + exp((s - d)/0.1));
+    Expression lambda2 = 1/(1 + exp((s - d)/0.1));
+    Expression lambda3 = 1/(1 + exp((s - d)/0.1));
 
 	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
 	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
@@ -121,10 +144,20 @@ int main( ){
 	Expression dx_path2 = (3*a_X2*(s-s02)*(s-s02) + 2*b_X2*(s-s02) + c_X2) ;
 	Expression dy_path2 = (3*a_Y2*(s-s02)*(s-s02) + 2*b_Y2*(s-s02) + c_Y2) ;
 
-	Expression x_path = lambda*x_path1 + (1 - lambda)*x_path2;
-	Expression y_path = lambda*y_path1 + (1 - lambda)*y_path2;
-	Expression dx_path = lambda*dx_path1 + (1 - lambda)*dx_path2;
-	Expression dy_path = lambda*dy_path1 + (1 - lambda)*dy_path2;
+    Expression x_path3 = (a_X3*(s-s03)*(s-s03)*(s-s03) + b_X3*(s-s03)*(s-s03) + c_X3*(s-s03) + d_X3) ;
+    Expression y_path3 = (a_Y3*(s-s03)*(s-s03)*(s-s03) + b_Y3*(s-s03)*(s-s03) + c_Y3*(s-s03) + d_Y3) ;
+    Expression dx_path3 = (3*a_X3*(s-s03)*(s-s03) + 2*b_X3*(s-s03) + c_X3) ;
+    Expression dy_path3 = (3*a_Y3*(s-s03)*(s-s03) + 2*b_Y3*(s-s03) + c_Y3) ;
+
+    Expression x_path4 = (a_X4*(s-s04)*(s-s04)*(s-s04) + b_X4*(s-s04)*(s-s04) + c_X4*(s-s04) + d_X4) ;
+    Expression y_path4 = (a_Y4*(s-s04)*(s-s04)*(s-s04) + b_Y4*(s-s04)*(s-s04) + c_Y4*(s-s04) + d_Y4) ;
+    Expression dx_path4 = (3*a_X4*(s-s04)*(s-s04) + 2*b_X4*(s-s04) + c_X4) ;
+    Expression dy_path4 = (3*a_Y4*(s-s04)*(s-s04) + 2*b_Y4*(s-s04) + c_Y4) ;
+
+    Expression x_path = lambda1*lambda2*lambda3*x_path1 + (1 - lambda1)*lambda2*lambda3*x_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*x_path3;
+    Expression y_path = lambda1*lambda2*lambda3*y_path1 + (1 - lambda1)*lambda2*lambda3*y_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*y_path3;
+    Expression dx_path = lambda1*lambda2*lambda3*dx_path1 + (1 - lambda1)*lambda2*lambda3*dx_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*dx_path3;
+    Expression dy_path = lambda1*lambda2*lambda3*dy_path1 + (1 - lambda1)*lambda2*lambda3*dy_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*dy_path3;
 
 	Expression abs_grad = sqrt(dx_path.getPowInt(2) + dy_path.getPowInt(2));
 	Expression dx_path_norm = dx_path/abs_grad;
