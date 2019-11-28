@@ -87,7 +87,9 @@ int main( ){
     OnlineData s04;
 
 	// d: used to evaluate lambda (equivalent of delta in the Jackal version)
-	OnlineData d;
+	OnlineData delta1;
+    OnlineData delta2;
+    OnlineData delta3;
 
 	// Wx: weight of contour error
 	OnlineData Wx;
@@ -107,6 +109,8 @@ int main( ){
 	OnlineData wP;
 	OnlineData r_disc;
 	OnlineData disc_pos_0;
+    OnlineData disc_pos_1;
+    OnlineData disc_pos_2;
 	//Description of Obstacle 1
 	OnlineData obst1_x;
 	OnlineData obst1_y;
@@ -124,15 +128,10 @@ int main( ){
 	OnlineData obst2_minor;
 	// Wv: weight on the desired acceleration
 	OnlineData Wv;
-	OnlineData disc_pos_1;
-	OnlineData disc_pos_2;
-	OnlineData right_offset;
-	OnlineData left_offset;
 
-	Expression lambda = 1/(1 + exp((s - d)/0.1));
-    Expression lambda1 = 1/(1 + exp((s - d)/0.1));
-    Expression lambda2 = 1/(1 + exp((s - d)/0.1));
-    Expression lambda3 = 1/(1 + exp((s - d)/0.1));
+	Expression lambda1 = 1/(1 + exp((s - delta1)/0.1));
+    Expression lambda2 = 1/(1 + exp((s - delta2)/0.1));
+    Expression lambda3 = 1/(1 + exp((s - delta3)/0.1));
 
 	Expression x_path1 = (a_X1*(s-s01)*(s-s01)*(s-s01) + b_X1*(s-s01)*(s-s01) + c_X1*(s-s01) + d_X1) ;
 	Expression y_path1 = (a_Y1*(s-s01)*(s-s01)*(s-s01) + b_Y1*(s-s01)*(s-s01) + c_Y1*(s-s01) + d_Y1) ;
@@ -187,7 +186,7 @@ int main( ){
 	OCP ocp( 0.0, 3.0, 15.0 );
 
 	// Need to set the number of online variables!
-	ocp.setNOD(43);
+	ocp.setNOD(61);
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
