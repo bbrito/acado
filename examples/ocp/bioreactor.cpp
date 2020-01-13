@@ -72,19 +72,9 @@ int main( ){
     OnlineData c_Y3;
     OnlineData d_Y3;
 
-    OnlineData a_X4;
-    OnlineData b_X4;
-    OnlineData c_X4;
-    OnlineData d_X4;
-    OnlineData a_Y4;
-    OnlineData b_Y4;
-    OnlineData c_Y4;
-    OnlineData d_Y4;
-
 	OnlineData s01;
 	OnlineData s02;
     OnlineData s03;
-    OnlineData s04;
 
 	// d: used to evaluate lambda (equivalent of delta in the Jackal version)
 	OnlineData delta1;
@@ -148,10 +138,6 @@ int main( ){
     Expression dx_path3 = (3*a_X3*(s-s03)*(s-s03) + 2*b_X3*(s-s03) + c_X3) ;
     Expression dy_path3 = (3*a_Y3*(s-s03)*(s-s03) + 2*b_Y3*(s-s03) + c_Y3) ;
 
-    Expression x_path4 = (a_X4*(s-s04)*(s-s04)*(s-s04) + b_X4*(s-s04)*(s-s04) + c_X4*(s-s04) + d_X4) ;
-    Expression y_path4 = (a_Y4*(s-s04)*(s-s04)*(s-s04) + b_Y4*(s-s04)*(s-s04) + c_Y4*(s-s04) + d_Y4) ;
-    Expression dx_path4 = (3*a_X4*(s-s04)*(s-s04) + 2*b_X4*(s-s04) + c_X4) ;
-    Expression dy_path4 = (3*a_Y4*(s-s04)*(s-s04) + 2*b_Y4*(s-s04) + c_Y4) ;
 
     Expression x_path = lambda1*lambda2*lambda3*x_path1 + (1 - lambda1)*lambda2*lambda3*x_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*x_path3;
     Expression y_path = lambda1*lambda2*lambda3*y_path1 + (1 - lambda1)*lambda2*lambda3*y_path2 + (1 - lambda1)*(1 - lambda2)*lambda3*y_path3;
@@ -186,13 +172,13 @@ int main( ){
 	OCP ocp( 0.0, 3.0, 15.0 );
 
 	// Need to set the number of online variables!
-	ocp.setNOD(61);
+	ocp.setNOD(52);
 
 	Expression error_contour   = dy_path_norm * (x - x_path) - dx_path_norm * (y - y_path);
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
 
-	Expression road_boundary = -dy_path_norm * (x - x_path) + dx_path_norm * (y - y_path);
+	//Expression road_boundary = -dy_path_norm * (x - x_path) + dx_path_norm * (y - y_path);
 
 	Expression R_car(2,2);
 	R_car(0,0) = cos(psi);
@@ -223,8 +209,6 @@ int main( ){
 
 	Expression position_disc_3(2,1);
 	position_disc_3 = CoG+R_car*shift_3;
-
-
 
 	// For Obstacle 1
 
@@ -296,14 +280,12 @@ int main( ){
 	R_obst_2(1,1) = cos(obst2_theta);
 
 
-	Expression c_disc_1_obst_1, c_disc_2_obst_1, c_disc_3_obst_1, c_disc_1_obst_2, c_disc_2_obst_2, c_disc_3_obst_2;
+	Expression c_disc_1_obst_1, c_disc_2_obst_1, c_disc_1_obst_2, c_disc_2_obst_2;
 	c_disc_1_obst_1 = deltaPos_disc_1_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_1_obstacle_1;
 	c_disc_2_obst_1 = deltaPos_disc_2_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_2_obstacle_1;
-	c_disc_3_obst_1 = deltaPos_disc_3_obstacle_1.transpose() * R_obst_1.transpose() * ab_1 * R_obst_1 * deltaPos_disc_3_obstacle_1;
 
 	c_disc_1_obst_2 = deltaPos_disc_1_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_1_obstacle_2;
 	c_disc_2_obst_2 = deltaPos_disc_2_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_2_obstacle_2;
-	c_disc_3_obst_2 = deltaPos_disc_3_obstacle_2.transpose() * R_obst_2.transpose() * ab_2 * R_obst_2 * deltaPos_disc_3_obstacle_2;
 
 	//ocp.subjectTo(c_disc_1_obst_1 + sv >= 1);
 	//ocp.subjectTo(c_disc_2_obst_1 + sv >= 1);
@@ -313,12 +295,10 @@ int main( ){
 	//ocp.subjectTo(c_disc_3_obst_2 + sv >= 1);
 	ocp.subjectTo(c_disc_1_obst_1 + sv >= 1);
 	ocp.subjectTo(c_disc_2_obst_1 + sv >= 1);
-	ocp.subjectTo(c_disc_3_obst_1 + sv >= 1);
 	//ocp.subjectTo(c_disc_4_obst_1 + sv >= 1);
 	//ocp.subjectTo(c_disc_5_obst_1 + sv >= 1);
 	ocp.subjectTo(c_disc_1_obst_2 + sv >= 1);
 	ocp.subjectTo(c_disc_2_obst_2 + sv >= 1);
-	ocp.subjectTo(c_disc_3_obst_2 + sv >= 1);
 	//ocp.subjectTo(c_disc_4_obst_2 + sv >= 1);
 	//ocp.subjectTo(c_disc_5_obst_2 + sv >= 1);
 	ocp.subjectTo(sv >= 0);
@@ -341,10 +321,8 @@ int main( ){
 			ws*sv+
 			wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+
 			wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+
-			wP*(1/((1-c_disc_3_obst_1)*(1-c_disc_3_obst_1)+.001))+
 			wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+
-			wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))+
-			wP*(1/((1-c_disc_3_obst_2)*(1-c_disc_3_obst_2)+.001))
+			wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))
 			//exp((error_contour-road_offset_right+exp_addition_right-right_offset)*steepness_right)+
 			//exp(-(error_contour-road_offset_left-exp_addition+left_offset)*steepness)
 	);//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
