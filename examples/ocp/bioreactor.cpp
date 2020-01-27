@@ -178,7 +178,7 @@ int main( ){
 
 	Expression error_lag       = -dx_path_norm * (x - x_path) - dy_path_norm * (y - y_path);
 
-	//Expression road_boundary = -dy_path_norm * (x - x_path) + dx_path_norm * (y - y_path);
+	Expression road_boundary = -dy_path_norm * (x - x_path) + dx_path_norm * (y - y_path);
 
 	Expression R_car(2,2);
 	R_car(0,0) = cos(psi);
@@ -249,8 +249,8 @@ int main( ){
 	//ocp.subjectTo( -0.5 <= delta_rate <= 0.5 );
 	// to test if the car stops with stricter road boundaries uncomment
 	//ocp.subjectTo(road_boundary  <= 1.5+.88);
-	//ocp.subjectTo(road_boundary -left_offset<= 4.24);
-	//ocp.subjectTo(-road_boundary-right_offset<= 1.88);
+	//ocp.subjectTo(road_boundary <= 3.5);
+	//ocp.subjectTo(-road_boundary<= 3.5);
 
 	// DEFINE COLLISION CONSTRAINTS:
 	// ---------------------------------------
@@ -304,8 +304,8 @@ int main( ){
 	ocp.subjectTo(sv >= 0);
 
 	// road boundary cost
-	float road_offset_left = -4.24;
-	float road_offset_right = 1.88;
+	float road_offset_left = -3;
+	float road_offset_right = 3;
 	int steepness=5;
     int steepness_right=5;
     int intersect_cost=100;
@@ -316,15 +316,15 @@ int main( ){
 	ocp.minimizeLagrangeTerm(
 			Wx*error_contour*error_contour +
 			Wy*error_lag*error_lag +
-			Wv*(v-vref)*(v-vref) +
+			Wv*(vref-v) +
 			Wa*a*a+ Wdelta*(delta)*(delta)+
 			ws*sv+
 			wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+
 			wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+
 			wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+
 			wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))
-			//exp((error_contour-road_offset_right+exp_addition_right-right_offset)*steepness_right)+
-			//exp(-(error_contour-road_offset_left-exp_addition+left_offset)*steepness)
+			//exp((error_contour-road_offset_right+exp_addition_right)*steepness_right)+
+			//exp(-(error_contour-road_offset_left-exp_addition)*steepness)
 	);//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
 
 	ocp.setModel(f);
