@@ -169,7 +169,7 @@ int main( ){
 	// DEFINE AN OPTIMAL CONTROL PROBLEM:
 	// ----------------------------------
 	// OCP ocp( 0.0, 5.0, 25.0 );
-	OCP ocp( 0.0, 3.0, 15.0 );
+	OCP ocp( 0.0, 1.0, 10.0 );
 
 	// Need to set the number of online variables!
 	ocp.setNOD(52);
@@ -244,7 +244,7 @@ int main( ){
 
 	ocp.subjectTo( -6 <= a <= 1 );
 	ocp.subjectTo( -0.52 <= delta <= 0.52 );
-	ocp.subjectTo( 0 <= v <= 30.0 );
+	ocp.subjectTo( 0 <= v <= 50.0 );
 	//ocp.subjectTo( -10 <= jerk <= 10 );
 	//ocp.subjectTo( -0.5 <= delta_rate <= 0.5 );
 	// to test if the car stops with stricter road boundaries uncomment
@@ -316,13 +316,13 @@ int main( ){
 	ocp.minimizeLagrangeTerm(
 			Wx*error_contour*error_contour +
 			Wy*error_lag*error_lag +
-			Wv*(vref-v) +
+			Wv*(vref-v)*(vref-v)+
 			Wa*a*a+ Wdelta*(delta)*(delta)+
 			ws*sv+
-			wP*(1/((1-c_disc_1_obst_1)*(1-c_disc_1_obst_1)+.001))+
-			wP*(1/((1-c_disc_2_obst_1)*(1-c_disc_2_obst_1)+.001))+
-			wP*(1/((1-c_disc_1_obst_2)*(1-c_disc_1_obst_2)+.001))+
-			wP*(1/((1-c_disc_2_obst_2)*(1-c_disc_2_obst_2)+.001))
+			wP*(1/((1.2-c_disc_1_obst_1)*(1.2-c_disc_1_obst_1)+.001))+
+			wP*(1/((1.2-c_disc_2_obst_1)*(1.2-c_disc_2_obst_1)+.001))+
+			wP*(1/((1.2-c_disc_1_obst_2)*(1.2-c_disc_1_obst_2)+.001))+
+			wP*(1/((1.2-c_disc_2_obst_2)*(1.2-c_disc_2_obst_2)+.001))
 			//exp((error_contour-road_offset_right+exp_addition_right)*steepness_right)+
 			//exp(-(error_contour-road_offset_left-exp_addition)*steepness)
 	);//+0*exp((-road_boundary+1)/0.1)+dot(a)*dot(a) // weight this with the physical cost!!!
